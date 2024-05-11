@@ -1,18 +1,24 @@
+package Project.Window;
+
+import Project.GameInputListener;
+import Project.GameLogic.Game;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class GameWindow extends JPanel implements PaintingConstants {
-    private final PlayerObject player;
+    private final Game game;
 
-    public GameWindow(GameInputListener gameInputListener, PlayerObject player) {
+    public GameWindow(Game game, GameInputListener gameInputListener) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Top Down Map View");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.getContentPane().add(this);
             frame.pack();
             frame.setVisible(true);
+            frame.setResizable(false);
         });
-        this.player = player;
+        this.game = game;
 
         setPreferredSize(new Dimension(View.WIDTH, View.HEIGHT));
         setBackground(Color.WHITE);
@@ -36,17 +42,17 @@ public class GameWindow extends JPanel implements PaintingConstants {
         int barrelY = viewCenterY - Player.Barrel.ROTATION_PIVOT_Y;
 
         // Paint barrel
-        g2.rotate(player.getAngle(), viewCenterX, viewCenterY);
+        g2.rotate(game.getMainPlayer().getFacingAngle(), viewCenterX, viewCenterY);
         g2.setStroke(new BasicStroke(Player.Barrel.OUTLINE_THICKNESS));
         g2.setColor(Color.GRAY);
         g2.fillRect(barrelX, barrelY, Player.Barrel.WIDTH, Player.Barrel.HEIGHT);
         g2.setColor(Color.BLACK);
         g2.drawRect(barrelX, barrelY, Player.Barrel.WIDTH, Player.Barrel.HEIGHT);
-        g2.rotate(-player.getAngle(), viewCenterX, viewCenterY);
+        g2.rotate(-game.getMainPlayer().getFacingAngle(), viewCenterX, viewCenterY);
 
         // Paint player
         g2.setStroke(new BasicStroke(Player.OUTLINE_THICKNESS));
-        g2.setColor(Color.YELLOW);
+        g2.setColor(game.getMainPlayer().getColor());
         g2.fillOval(playerX, playerY, playerDiameter, playerDiameter);
         g2.setColor(Color.BLACK);
         g2.drawOval(playerX, playerY, playerDiameter, playerDiameter);
@@ -59,8 +65,8 @@ public class GameWindow extends JPanel implements PaintingConstants {
 
         int viewCenterX = View.WIDTH / 2;
         int viewCenterY = View.HEIGHT / 2;
-        int mapX = viewCenterX - (int)Map.OUTLINE_THICKNESS  / 2 - (int)player.getPlayerX();
-        int mapY = viewCenterY - (int)Map.OUTLINE_THICKNESS / 2 - (int)player.getPlayerY();
+        int mapX = viewCenterX - (int)Map.OUTLINE_THICKNESS  / 2 - (int)game.getMainPlayer().getCenter().getX();
+        int mapY = viewCenterY - (int)Map.OUTLINE_THICKNESS / 2 - (int)game.getMainPlayer().getCenter().getY();
 
         g2.setColor(Color.BLACK);
         g2.setStroke(new BasicStroke(Map.OUTLINE_THICKNESS));

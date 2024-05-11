@@ -1,3 +1,5 @@
+package Project;
+
 import lombok.Setter;
 import lombok.Getter;
 public class InputState {

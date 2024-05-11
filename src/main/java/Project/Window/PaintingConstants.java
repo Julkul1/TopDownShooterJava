@@ -1,7 +1,9 @@
+package Project.Window;
+
 public interface PaintingConstants {
     interface View {
-        int WIDTH = 1000;
-        int HEIGHT = 600;
+        int WIDTH = 1280;
+        int HEIGHT = 720;
     }
 
     interface Player {
