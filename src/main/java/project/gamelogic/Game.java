@@ -1,8 +1,8 @@
-package Project.GameLogic;
+package project.gamelogic;
 
-import Project.GameLogic.Objects.*;
-import Project.InputState;
-import Project.Window.PaintingConstants;
+import project.gamelogic.objects.*;
+import project.InputState;
+import project.window.PaintingConstants;
 import lombok.Getter;
 
 import java.awt.*;

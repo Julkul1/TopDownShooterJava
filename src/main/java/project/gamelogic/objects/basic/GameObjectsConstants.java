@@ -1,4 +1,4 @@
-package Project.GameLogic.Objects.Default;
+package project.gamelogic.objects.basic;
 
 public interface GameObjectsConstants {
     public interface Player {

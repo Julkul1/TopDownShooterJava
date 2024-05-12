@@ -1,8 +1,8 @@
-package Project.GameLogic.Objects;
+package project.gamelogic.objects;
 
-import Project.GameLogic.Objects.Default.DynamicObject;
-import Project.GameLogic.Objects.Default.GameObjectsConstants;
-import Project.GameLogic.Objects.Default.StaticObject;
+import project.gamelogic.objects.basic.DynamicObject;
+import project.gamelogic.objects.basic.GameObjectsConstants;
+import project.gamelogic.objects.basic.StaticObject;
 import lombok.Getter;
 
 import java.awt.*;

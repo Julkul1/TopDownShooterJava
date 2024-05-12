@@ -1,7 +1,7 @@
-package Project.Window;
+package project.window;
 
-import Project.GameInputListener;
-import Project.GameLogic.Game;
+import project.GameInputListener;
+import project.gamelogic.Game;
 
 import javax.swing.*;
 import java.awt.*;

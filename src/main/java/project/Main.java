@@ -1,8 +1,7 @@
-package Project;
+package project;
 
-import Project.GameLogic.Game;
-import Project.Window.GameWindow;
-import Project.Window.GameWindowUpdater;
+import project.gamelogic.Game;
+import project.window.GameWindowUpdater;
 
 public class Main {
 

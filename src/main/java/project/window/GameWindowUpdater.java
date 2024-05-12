@@ -1,8 +1,7 @@
-package Project.Window;
+package project.window;
 
-import Project.GameInputListener;
-import Project.GameLogic.Game;
-import Project.InputState;
+import project.GameInputListener;
+import project.gamelogic.Game;
 
 public class GameWindowUpdater implements Runnable {
     private static final int TARGET_FPS = 60;

@@ -1,6 +1,5 @@
-package Project.GameLogic.Objects.Default;
+package project.gamelogic.objects.basic;
 
-import Project.GameLogic.Objects.Default.DynamicObject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package Project.Window;
+package project.window;
 
 public interface PaintingConstants {
     interface View {
