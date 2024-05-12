@@ -16,7 +16,7 @@ abstract public class DynamicObject extends StaticObject {
     @Getter @Setter
     protected boolean isMoving;
 
-    public DynamicObject(Point2D.Float center, double radius, Color color, double moveAngle, float speed) {
+    public DynamicObject(Point2D.Float center, float radius, Color color, double moveAngle, float speed) {
         super(center, radius, color);
         this.moveAngle = moveAngle;
         this.speed = speed;

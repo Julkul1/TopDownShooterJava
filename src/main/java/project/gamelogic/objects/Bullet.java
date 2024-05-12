@@ -1,7 +1,6 @@
 package project.gamelogic.objects;
 
 import project.gamelogic.objects.basic.DynamicObject;
-import project.gamelogic.objects.basic.GameObjectsConstants;
 import project.gamelogic.objects.basic.StaticObject;
 import lombok.Getter;
 

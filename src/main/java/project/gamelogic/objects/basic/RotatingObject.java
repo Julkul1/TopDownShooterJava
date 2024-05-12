@@ -11,7 +11,7 @@ import java.awt.geom.Point2D;
 abstract public class RotatingObject extends DynamicObject {
     @Getter @Setter
     protected double facingAngle;
-    public RotatingObject(Point2D.Float center, double radius, Color color, double moveAngle, float speed, double facingAngle) {
+    public RotatingObject(Point2D.Float center, float radius, Color color, double moveAngle, float speed, double facingAngle) {
         super(center, radius, color, moveAngle, speed);
         this.facingAngle = facingAngle;
     }

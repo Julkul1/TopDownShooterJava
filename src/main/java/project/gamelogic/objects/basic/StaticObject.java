@@ -10,13 +10,13 @@ import java.io.Serializable;
 @NoArgsConstructor
 abstract public class StaticObject implements Serializable {
     @Getter @Setter
-    protected double radius;
+    protected float radius;
     @Getter @Setter
     protected Color color;
     @Getter @Setter
     protected Point2D.Float center;
 
-    public StaticObject(Point2D.Float center, double radius, Color color) {
+    public StaticObject(Point2D.Float center, float radius, Color color) {
         this.center = center;
         this.radius = radius;
         this.color = color;

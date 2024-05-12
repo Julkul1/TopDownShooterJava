@@ -7,21 +7,29 @@ import lombok.Getter;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Game implements Runnable {
     private static final int TARGET_TICK_RATE = 120;
     private static final long TARGET_TIME = 1000000000 / TARGET_TICK_RATE;
+    private static final int pointsToWin = 100;
+    private static final int pointsPerKill = 5;
     @Getter
-    List<Player> otherPlayers;
+    private List<Player> players =  new LinkedList<>();
+    @Getter
+    private List<Bullet> bullets = new LinkedList<>();
+    @Getter
+    private List<PowerUp> powerUps = new LinkedList<>();
+    private Map<Player, Integer> scoreTable = new HashMap<>();
     @Getter
     Player mainPlayer;
     private final InputState inputState;
 
     public Game(InputState inputState) {
-        otherPlayers = new LinkedList<>();
-        mainPlayer = new Player(new Point2D.Float(0,0), Color.CYAN);
+        mainPlayer = new Player(new Point2D.Float(100,100), Color.CYAN);
         this.inputState = inputState;
     }
 
@@ -81,5 +89,11 @@ public class Game implements Runnable {
         mainPlayer.setMoving(isMoving);
 
         mainPlayer.update(deltaTime);
+        GameMap.collide(mainPlayer);
+    }
+
+    public void addPlayer(Player newPlayer) {
+        players.add(newPlayer);
+        scoreTable.put(newPlayer, 0);
     }
 }

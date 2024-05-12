@@ -2,6 +2,7 @@ package project.window;
 
 import project.GameInputListener;
 import project.gamelogic.Game;
+import project.gamelogic.GameMap;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,12 +66,18 @@ public class GameWindow extends JPanel implements PaintingConstants {
 
         int viewCenterX = View.WIDTH / 2;
         int viewCenterY = View.HEIGHT / 2;
-        int mapX = viewCenterX - (int)Map.OUTLINE_THICKNESS  / 2 - (int)game.getMainPlayer().getCenter().getX();
-        int mapY = viewCenterY - (int)Map.OUTLINE_THICKNESS / 2 - (int)game.getMainPlayer().getCenter().getY();
+        int translateX = (int)game.getMainPlayer().getCenter().getX();
+        int translateY = (int)game.getMainPlayer().getCenter().getY();
+        int mapX = viewCenterX - (int)Map.OUTLINE_THICKNESS / 2;
+        int mapY = viewCenterY - (int)Map.OUTLINE_THICKNESS / 2;
+        int width = GameMap.WIDTH + (int)Map.OUTLINE_THICKNESS;
+        int height = GameMap.HEIGHT + (int)Map.OUTLINE_THICKNESS;
 
+        g2.translate(-translateX, -translateY);
         g2.setColor(Color.BLACK);
         g2.setStroke(new BasicStroke(Map.OUTLINE_THICKNESS));
-        g2.drawRect(mapX, mapY, 2000, 2000);
+        g2.drawRect(mapX, mapY, width, height);
+        g2.translate(translateX, translateY);
 
         g2.setStroke(oldStroke);
     }

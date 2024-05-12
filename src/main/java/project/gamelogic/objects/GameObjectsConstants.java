@@ -1,4 +1,6 @@
-package project.gamelogic.objects.basic;
+package project.gamelogic.objects;
+
+import java.awt.*;
 
 public interface GameObjectsConstants {
     public interface Player {
@@ -11,5 +13,10 @@ public interface GameObjectsConstants {
     public interface Bullet {
         float RADIUS = 10.0f;
         float SPEED = 15.0f;
+    }
+
+    public interface POWER_UP {
+        float RADIUS = 20.0f;
+        Color COLOR = Color.green;
     }
 }
