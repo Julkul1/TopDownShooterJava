@@ -9,4 +9,5 @@ public class InputState {
     @Getter @Setter private boolean leftKeyPressed;
     @Getter @Setter private int cursorX;
     @Getter @Setter private int cursorY;
+    @Getter @Setter private boolean leftMouseClick;
 }

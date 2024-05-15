@@ -52,7 +52,11 @@ public class GameInputListener implements KeyListener, MouseListener, MouseMotio
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
-
+        switch(mouseEvent.getButton()) {
+            case MouseEvent.BUTTON1:
+                inputState.setLeftMouseClick(true);
+                break;
+        }
     }
 
     @Override

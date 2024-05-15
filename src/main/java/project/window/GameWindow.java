@@ -3,9 +3,12 @@ package project.window;
 import project.GameInputListener;
 import project.gamelogic.Game;
 import project.gamelogic.GameMap;
+import project.gamelogic.objects.Bullet;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 public class GameWindow extends JPanel implements PaintingConstants {
     private final Game game;
@@ -61,6 +64,33 @@ public class GameWindow extends JPanel implements PaintingConstants {
         g2.setStroke(oldStroke);
     }
 
+    private void drawBullets(Graphics2D g2) {
+        Stroke oldStroke = g2.getStroke();
+        int translateX = (int)game.getMainPlayer().getCenter().getX() - View.WIDTH / 2;
+        int translateY = (int)game.getMainPlayer().getCenter().getY() - View.HEIGHT / 2;
+        g2.translate(-translateX, -translateY);
+        g2.setStroke(new BasicStroke(Player.OUTLINE_THICKNESS));
+
+        Point2D.Float bulletCenter;
+        int bulletX;
+        int bulletY;
+        int bulletDiameter;
+
+        for (Bullet bullet: game.getBullets()) {
+            bulletCenter = bullet.getCenter();
+            bulletX = (int)bulletCenter.getX() - (int)bullet.getRadius();
+            bulletY = (int)bulletCenter.getY() - (int)bullet.getRadius();
+            bulletDiameter = (int)bullet.getRadius() * 2;
+
+            g2.setColor(bullet.getColor());
+            g2.fillOval(bulletX, bulletY, bulletDiameter, bulletDiameter);
+            g2.setColor(Color.BLACK);
+            g2.drawOval(bulletX, bulletY, bulletDiameter, bulletDiameter);
+        }
+        g2.translate(translateX, translateY);
+        g2.setStroke(oldStroke);
+    }
+
     private void drawMap(Graphics2D g2) {
         Stroke oldStroke = g2.getStroke();
 
@@ -86,10 +116,10 @@ public class GameWindow extends JPanel implements PaintingConstants {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-
         Graphics2D g2 = (Graphics2D) g;
         drawMap(g2);
         drawPlayer(g2);
+        drawBullets(g2);
     }
 
 }

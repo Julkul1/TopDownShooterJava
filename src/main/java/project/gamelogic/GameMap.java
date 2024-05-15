@@ -1,6 +1,8 @@
 package project.gamelogic;
 
+import project.gamelogic.objects.Player;
 import project.gamelogic.objects.basic.StaticObject;
+import project.gamelogic.objects.basic.Status;
 
 import java.awt.geom.Point2D;
 
@@ -13,28 +15,29 @@ public class GameMap {
         Point2D.Float center = object.getCenter();
 
         if (doesCollide(object)) {
-            float x, y;
-            if (center.getX() + radius > WIDTH) {
-                x = WIDTH - radius;
-            }
-            else if(center.getX() - radius < 0) {
-                x = radius;
+            if (object instanceof Player) {
+                float x, y;
+                if (center.getX() + radius > WIDTH) {
+                    x = WIDTH - radius;
+                } else if (center.getX() - radius < 0) {
+                    x = radius;
+                } else {
+                    x = center.x;
+                }
+
+                if (center.getY() + radius > HEIGHT) {
+                    y = HEIGHT - radius;
+                } else if (center.getY() - radius < 0) {
+                    y = radius;
+                } else {
+                    y = center.y;
+                }
+
+                object.setCenter(new Point2D.Float(x, y));
             }
             else {
-                x = center.x;
+                object.setStatus(Status.DEAD);
             }
-
-            if (center.getY() + radius > HEIGHT) {
-                y = HEIGHT - radius;
-            }
-            else if(center.getY() - radius < 0) {
-                y = radius;
-            }
-            else {
-                y = center.y;
-            }
-
-            object.setCenter(new Point2D.Float(x, y));
         }
     }
 

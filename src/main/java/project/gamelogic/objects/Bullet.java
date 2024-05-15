@@ -10,14 +10,21 @@ import java.awt.geom.Point2D;
 public class Bullet extends DynamicObject implements GameObjectsConstants.Bullet {
     @Getter
     private final float damage;
+    @Getter
+    private final Player creator;
 
-    public Bullet(Point2D.Float center, Color color, double moveAngle, float damage) {
+    public Bullet(Player creator, Point2D.Float center, Color color, double moveAngle, float damage) {
         super(center, RADIUS, color, moveAngle, SPEED);
         this.damage = damage;
+        this.creator = creator;
+        this.isMoving = true;
     }
 
     @Override
     public void collide(StaticObject object) {
-
+        if (object instanceof Player && creator != object) {
+            Player player = (Player)object;
+            player.collide(this);
+        }
     }
 }

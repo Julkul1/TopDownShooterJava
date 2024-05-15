@@ -15,11 +15,14 @@ abstract public class StaticObject implements Serializable {
     protected Color color;
     @Getter @Setter
     protected Point2D.Float center;
+    @Getter @Setter
+    protected Status status;
 
     public StaticObject(Point2D.Float center, float radius, Color color) {
         this.center = center;
         this.radius = radius;
         this.color = color;
+        status = Status.ALIVE;
     }
 
     public abstract void collide(StaticObject object);
