@@ -17,6 +17,8 @@ public class Game implements Runnable {
     private static final long TARGET_TIME = 1000000000 / TARGET_TICK_RATE;
     private static final int pointsToWin = 100;
     private static final int pointsPerKill = 5;
+
+    private int timeToCreatePowerUp = 5;
     @Getter
     private List<Player> players =  new LinkedList<>();
     @Getter
@@ -54,8 +56,21 @@ public class Game implements Runnable {
                 System.out.println("TICK RATE: " + ticks);
                 ticks = 0;
                 timer += 1000;
+                System.out.println(getMainPlayer().getStrength());
+                timeToCreatePowerUp--;
+                if(timeToCreatePowerUp == 0){
+                    powerUps.add(createPowerUp());
+                    timeToCreatePowerUp = 5;
+                }
             }
         }
+    }
+
+    public PowerUp createPowerUp(){
+        Random rand = new Random();
+        int y = rand.nextInt(GameMap.HEIGHT);
+        int x = rand.nextInt(GameMap.WIDTH);
+        return new PowerUp(new Point2D.Float(x,y));
     }
 
     public void update(double deltaTime) {
@@ -67,6 +82,15 @@ public class Game implements Runnable {
         for (Bullet bullet : bullets) {
             bullet.update(deltaTime);
             collide(bullet);
+        }
+
+        Iterator<PowerUp> iterator = powerUps.iterator();
+        while (iterator.hasNext()) {
+            PowerUp powerUp = iterator.next();
+            powerUp.update(deltaTime);
+            if (powerUp.isRemove()) {
+                iterator.remove();
+            }
         }
 
         bullets.removeIf(bullet -> bullet.getStatus() == Status.DEAD);
@@ -93,6 +117,16 @@ public class Game implements Runnable {
         for (Bullet bullet : bullets) {
             if (object != bullet && object.getStatus() == Status.ALIVE && object.doesCollide(bullet)) {
                 object.collide(bullet);
+            }
+            if (object.getStatus() == Status.DEAD){
+                return;
+            }
+        }
+
+        for (PowerUp powerUp : powerUps) {
+            if (object instanceof Player && object.getStatus() == Status.ALIVE && object.doesCollide(powerUp)) {
+                object.collide(powerUp);
+                powerUps.remove(powerUp);
             }
             if (object.getStatus() == Status.DEAD){
                 return;

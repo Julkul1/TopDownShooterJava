@@ -4,6 +4,7 @@ import project.GameInputListener;
 import project.gamelogic.Game;
 import project.gamelogic.GameMap;
 import project.gamelogic.objects.Bullet;
+import project.gamelogic.objects.PowerUp;
 
 import javax.swing.*;
 import java.awt.*;
@@ -91,6 +92,33 @@ public class GameWindow extends JPanel implements PaintingConstants {
         g2.setStroke(oldStroke);
     }
 
+    private void drawPowerUp(Graphics2D g2) {
+        Stroke oldStroke = g2.getStroke();
+        int translateX = (int)game.getMainPlayer().getCenter().getX() - View.WIDTH / 2;
+        int translateY = (int)game.getMainPlayer().getCenter().getY() - View.HEIGHT / 2;
+        g2.translate(-translateX, -translateY);
+        g2.setStroke(new BasicStroke(Player.OUTLINE_THICKNESS));
+
+        Point2D.Float PowerUpCenter;
+        int PowerUpX;
+        int PowerUpY;
+        int PowerUpDiameter;
+
+        for (PowerUp powerUp: game.getPowerUps()) {
+            PowerUpCenter = powerUp.getCenter();
+            PowerUpX = (int)PowerUpCenter.getX() - (int)powerUp.getRadius();
+            PowerUpY = (int)PowerUpCenter.getY() - (int)powerUp.getRadius();
+            PowerUpDiameter = (int)powerUp.getRadius() * 2;
+
+            g2.setColor(powerUp.getColor());
+            g2.fillOval(PowerUpX, PowerUpY, PowerUpDiameter, PowerUpDiameter);
+            g2.setColor(Color.BLACK);
+            g2.drawOval(PowerUpX, PowerUpY, PowerUpDiameter, PowerUpDiameter);
+        }
+        g2.translate(translateX, translateY);
+        g2.setStroke(oldStroke);
+    }
+
     private void drawMap(Graphics2D g2) {
         Stroke oldStroke = g2.getStroke();
 
@@ -120,6 +148,7 @@ public class GameWindow extends JPanel implements PaintingConstants {
         drawMap(g2);
         drawPlayer(g2);
         drawBullets(g2);
+        drawPowerUp(g2);
     }
 
 }

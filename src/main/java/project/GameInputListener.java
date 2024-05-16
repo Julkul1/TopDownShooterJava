@@ -17,15 +17,19 @@ public class GameInputListener implements KeyListener, MouseListener, MouseMotio
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_UP:
+            case KeyEvent.VK_W:
                 inputState.setUpKeyPressed(true);
                 break;
             case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_S:
                 inputState.setDownKeyPressed(true);
                 break;
             case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_A:
                 inputState.setLeftKeyPressed(true);
                 break;
             case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_D:
                 inputState.setRightKeyPressed(true);
                 break;
         }
@@ -36,15 +40,19 @@ public class GameInputListener implements KeyListener, MouseListener, MouseMotio
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_UP:
+            case KeyEvent.VK_W:
                 inputState.setUpKeyPressed(false);
                 break;
             case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_S:
                 inputState.setDownKeyPressed(false);
                 break;
             case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_A:
                 inputState.setLeftKeyPressed(false);
                 break;
             case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_D:
                 inputState.setRightKeyPressed(false);
                 break;
         }

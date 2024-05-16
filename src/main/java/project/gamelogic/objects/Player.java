@@ -46,6 +46,10 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
                 bullet.setStatus(Status.DEAD);
             }
         }
+        if(object instanceof PowerUp){
+            PowerUp powerUp = (PowerUp)object;
+            this.setStrength(this.getStrength()+powerUp.getAddStrength());
+        }
     }
 
 }
