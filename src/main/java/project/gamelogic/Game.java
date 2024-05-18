@@ -19,6 +19,8 @@ public class Game implements Runnable {
     private static final int pointsPerKill = 5;
 
     private int timeToCreatePowerUp = 5;
+    private int shootingDelay = 1;
+    private boolean didShoot = false;
     @Getter
     private List<Player> players =  new LinkedList<>();
     @Getter
@@ -58,9 +60,17 @@ public class Game implements Runnable {
                 timer += 1000;
                 System.out.println(getMainPlayer().getStrength());
                 timeToCreatePowerUp--;
+
                 if(timeToCreatePowerUp == 0){
                     powerUps.add(createPowerUp());
                     timeToCreatePowerUp = 5;
+                }
+                if(didShoot == true){
+                    shootingDelay--;
+                    if(shootingDelay == 0){
+                        didShoot = false;
+                        shootingDelay = 1;
+                    }
                 }
             }
         }
@@ -156,8 +166,13 @@ public class Game implements Runnable {
         }
 
         if (inputState.isLeftMouseClick()) {
-            inputState.setLeftMouseClick(false);
-            addBullet(mainPlayer);
+            //inputState.setLeftMouseClick(false);
+            if(!didShoot){
+                addBullet(mainPlayer);
+                didShoot = true;
+            }
+
+
         }
 
         float centerX = (float)PaintingConstants.View.WIDTH / 2;

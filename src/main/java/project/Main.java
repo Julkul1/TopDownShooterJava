@@ -17,10 +17,14 @@ public class Main {
         gameLogic.start();
         gameView.start();
 
+
+
         try {
             gameLogic.join();
             gameView.join();
         } catch (InterruptedException e) {
+            gameLogic.interrupt();
+            gameView.interrupt();
             e.printStackTrace();
         }
 
