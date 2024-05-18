@@ -15,6 +15,24 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
     @Getter @Setter
     private float hitPoints;
     private static int globalID = 0;
+    private int shootingDelay = 1;
+    private boolean didShoot = false;
+
+    public int getShootingDelay(){
+        return shootingDelay;
+    }
+
+    public void setShootingDelay(int shootingDelay){
+        this.shootingDelay = shootingDelay;
+    }
+
+    public boolean isDidShoot(){
+        return didShoot;
+    }
+
+    public void setDidShoot(boolean didShoot){
+        this.didShoot = didShoot;
+    }
 
     @Getter @Setter
     private float strength;
