@@ -62,6 +62,13 @@ public class GameWindow extends JPanel implements PaintingConstants {
         g2.setColor(Color.BLACK);
         g2.drawOval(playerX, playerY, playerDiameter, playerDiameter);
 
+        // Paint healthBar
+        g2.setStroke(new BasicStroke(1.8f));
+        g2.setColor(Color.GREEN);
+        g2.fillRect(playerX - 10, playerY - 20, (int)game.getMainPlayer().getHitPoints(), 15);
+        g2.setColor(Color.BLACK);
+        g2.drawRect(playerX - 10, playerY - 20, (int)game.getMainPlayer().HIT_POINTS, 15);
+
         g2.setStroke(oldStroke);
     }
 
