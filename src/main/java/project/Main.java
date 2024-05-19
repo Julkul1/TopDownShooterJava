@@ -2,14 +2,6 @@ package project;
 
 import project.gamelogic.Game;
 
-<<<<<<< Updated upstream
-=======
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.net.Socket;
-import java.io.*;
-
->>>>>>> Stashed changes
 public class Main {
 
     public static void main(String[] args) {
@@ -40,7 +32,6 @@ public class Main {
             throw new RuntimeException(e);
         }
            */
->>>>>>> Stashed changes
     }
 
 }

@@ -9,25 +9,12 @@ import project.gamelogic.objects.basic.Status;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-<<<<<<< Updated upstream
-=======
 import java.net.*;
 import java.io.*;
 import java.security.PrivilegedAction;
->>>>>>> Stashed changes
 
 public class Player extends RotatingObject implements GameObjectsConstants.Player {
     private static int globalID = 0;
-<<<<<<< Updated upstream
-
-    @Getter @Setter
-    private float strength;
-    public Player(Point2D.Float center, Color color, int ID) {
-        super(center, RADIUS, color, 0.0, SPEED, 0.0);
-        this.ID = ID;
-        hitPoints = HIT_POINTS;
-        strength = STRENGTH;
-=======
     @Getter private final int ID;
     @Getter @Setter private float hitPoints;
     @Getter @Setter private float strength;
@@ -41,7 +28,6 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
         hitPoints = HIT_POINTS;
         strength = STRENGTH;
         this.game = game;
->>>>>>> Stashed changes
     }
 
     public static int getNextID() {

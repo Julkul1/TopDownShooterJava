@@ -16,10 +16,6 @@ public class Game {
     private static final int pointsToWin = 100;
     private static final int pointsPerKill = 5;
 
-<<<<<<< Updated upstream
-    private int timeToCreatePowerUp = 5;
-=======
->>>>>>> Stashed changes
     @Getter
     private List<Player> players =  new LinkedList<>();
     @Getter
@@ -27,45 +23,6 @@ public class Game {
     @Getter
     private List<PowerUp> powerUps = new LinkedList<>();
     private Map<Player, Integer> scoreTable = new HashMap<>();
-<<<<<<< Updated upstream
-    @Getter
-    Player mainPlayer;
-    private final InputState inputState;
-    public Game(InputState inputState) {
-        mainPlayer = new Player(new Point2D.Float(100,100), Color.CYAN, Player.getNextID());
-        this.inputState = inputState;
-    }
-
-    @Override
-    public void run() {
-        long lastTime = System.nanoTime();
-        long timer = System.currentTimeMillis();
-        double delta = 0;
-        int ticks = 0;
-
-        while (!Thread.interrupted()) {
-            long now = System.nanoTime();
-            delta += (now - lastTime) / (double) TARGET_TIME;
-            lastTime = now;
-
-            while (delta >= 1) {
-                update(delta);
-                delta--;
-                ticks++;
-            }
-
-            if (System.currentTimeMillis() - timer > 1000) {
-                System.out.println("TICK RATE: " + ticks);
-                ticks = 0;
-                timer += 1000;
-                System.out.println(getMainPlayer().getStrength());
-                timeToCreatePowerUp--;
-                if(timeToCreatePowerUp == 0){
-                    powerUps.add(createPowerUp());
-                    timeToCreatePowerUp = 5;
-                }
-            }
-=======
 
     void loadGame(Game gameToLoad){
         this.players = gameToLoad.players;
@@ -106,7 +63,6 @@ public class Game {
             x = (int)point.x;
             y = (int)point.y;
 
->>>>>>> Stashed changes
         }
         else {
             y = rand.nextInt(GameMap.HEIGHT);
@@ -220,14 +176,7 @@ public class Game {
             isMoving = true;
         }
 
-<<<<<<< Updated upstream
-        if (inputState.isLeftMouseClick()) {
-            inputState.setLeftMouseClick(false);
-            addBullet(mainPlayer);
-        }
-=======
         player.setShooting(inputState.isLeftMouseClick());
->>>>>>> Stashed changes
 
         float centerX = (float)PaintingConstants.View.WIDTH / 2;
         float centerY = (float)PaintingConstants.View.HEIGHT / 2;
