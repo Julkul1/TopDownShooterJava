@@ -18,25 +18,6 @@ public class Main {
         Game game = new Game(inputState);
         GameWindowUpdater gameWindowUpdater = new GameWindowUpdater(game, gameInputListener);
 
-        Socket playerSocket = null;
-        ObjectOutputStream playerOutputStream = null;
-        ObjectInputStream playerInputStream = null;
-        String IPAddress = "127.0.0.1";
-        int port = 3113;
-
-        try{
-            playerSocket = new Socket(IPAddress, port);
-            playerOutputStream = new ObjectOutputStream(playerSocket.getOutputStream());
-            playerInputStream = new ObjectInputStream(playerSocket.getInputStream());
-        }
-        catch(IOException i){
-            i.printStackTrace();
-            System.out.println("Error: connection refused on socket " + IPAddress+":"+port);
-            System.exit(-1);
-        }
-
-
-
 
 
         Thread gameLogic = new Thread(game);
@@ -55,11 +36,7 @@ public class Main {
             e.printStackTrace();
         }
 
-        try {
-            playerSocket.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
 
     }
 

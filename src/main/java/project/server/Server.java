@@ -1,8 +1,11 @@
 package project.server;
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.net.*;
 import java.io.*;
 
 import project.gamelogic.Game;
+import project.gamelogic.objects.Player;
 
 
 class Signaller{
@@ -18,6 +21,7 @@ class Signaller{
         this.createSignal = true;
     }
 }
+
 
 class ServerThread implements Runnable{
     //network fields
@@ -54,18 +58,29 @@ class ServerThread implements Runnable{
         Code for handling the client including any communication goes below.
          */
 
-        //writes game state to the client, not handled on the client side yet
-        outputStream.writeObject(gameState);
-        try{
-            //get events from user
-            inputStream.readObject();
 
-            /*
-            Update the game state based on events received from user
-             */
-        }catch(ClassNotFoundException cnfe){
-            cnfe.printStackTrace();
+        int id = Player.getNextID();
+        Player newPlayer = new Player(new Point2D.Float(100,100), Color.CYAN, id);
+        gameState.addPlayer(newPlayer);
+        outputStream.writeObject(gameState);
+        outputStream.writeObject(id);
+
+
+        while(true){
+            //writes game state to the client
+            outputStream.writeObject(gameState);
+            try{
+                //get events from user
+                inputStream.readObject();
+
+                /*
+                Update the game state based on events received from user
+                 */
+            }catch(ClassNotFoundException cnfe){
+                cnfe.printStackTrace();
+             }
         }
+
 
 
     }

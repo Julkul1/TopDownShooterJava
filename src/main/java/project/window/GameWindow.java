@@ -4,12 +4,15 @@ import project.GameInputListener;
 import project.gamelogic.Game;
 import project.gamelogic.GameMap;
 import project.gamelogic.objects.Bullet;
+import project.gamelogic.objects.Player;
 import project.gamelogic.objects.PowerUp;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class GameWindow extends JPanel implements PaintingConstants {
     private final Game game;
@@ -56,11 +59,31 @@ public class GameWindow extends JPanel implements PaintingConstants {
         g2.rotate(-game.getMainPlayer().getFacingAngle(), viewCenterX, viewCenterY);
 
         // Paint player
-        g2.setStroke(new BasicStroke(Player.OUTLINE_THICKNESS));
+        /*g2.setStroke(new BasicStroke(Player.OUTLINE_THICKNESS));
         g2.setColor(game.getMainPlayer().getColor());
         g2.fillOval(playerX, playerY, playerDiameter, playerDiameter);
         g2.setColor(Color.BLACK);
-        g2.drawOval(playerX, playerY, playerDiameter, playerDiameter);
+        g2.drawOval(playerX, playerY, playerDiameter, playerDiameter);*/
+
+        //Paint players
+        List playerList = game.getPlayers();
+        project.gamelogic.objects.Player mainPlayer = game.getMainPlayer();
+        float mainPlayerX = mainPlayer.getCenter().x;
+        float mainPlayerY = mainPlayer.getCenter().y;
+        for(int i = 0; i < playerList.size(); i++){
+
+
+
+            g2.setStroke(new BasicStroke(Player.OUTLINE_THICKNESS));
+            project.gamelogic.objects.Player currentPlayer = (project.gamelogic.objects.Player)playerList.get(i);
+
+            float otherPlayerX = currentPlayer.getCenter().x;
+            float otherPlayerY = currentPlayer.getCenter().y;
+            g2.setColor(currentPlayer.getColor());
+            g2.fillOval((int)(otherPlayerX-mainPlayerX)+playerX, (int)(otherPlayerY-mainPlayerY)+playerY, playerDiameter, playerDiameter);
+            g2.setColor(Color.BLACK);
+            g2.drawOval((int)(otherPlayerX-mainPlayerX)+playerX, (int)(otherPlayerY-mainPlayerY)+playerY, playerDiameter, playerDiameter);
+        }
 
         g2.setStroke(oldStroke);
     }

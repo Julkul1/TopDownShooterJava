@@ -2,6 +2,7 @@ package project.gamelogic.objects;
 
 import project.gamelogic.objects.basic.RotatingObject;
 import project.gamelogic.objects.basic.StaticObject;
+import project.gamelogic.Game;
 import lombok.Getter;
 import lombok.Setter;
 import project.gamelogic.objects.basic.Status;
@@ -11,7 +12,7 @@ import java.awt.geom.Point2D;
 import java.net.*;
 import java.io.*;
 
-public class Player extends RotatingObject implements GameObjectsConstants.Player {
+public class Player extends RotatingObject implements GameObjectsConstants.Player, Serializable{
     @Getter
     private final int ID;
     @Getter @Setter
@@ -19,7 +20,6 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
     private static int globalID = 0;
     private int shootingDelay = 1;
     private boolean didShoot = false;
-
 
 
     public int getShootingDelay(){

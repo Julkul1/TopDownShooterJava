@@ -1,5 +1,6 @@
 package project.gamelogic;
 
+import project.Client;
 import project.gamelogic.objects.*;
 import project.InputState;
 import project.gamelogic.objects.basic.StaticObject;
@@ -9,10 +10,15 @@ import lombok.Getter;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.Socket;
 import java.util.*;
 import java.util.List;
 
-public class Game implements Runnable {
+public class Game implements Runnable, Serializable {
     private static final int TARGET_TICK_RATE = 120;
     private static final long TARGET_TIME = 1000000000 / TARGET_TICK_RATE;
     private static final int pointsToWin = 100;
@@ -29,6 +35,7 @@ public class Game implements Runnable {
     private Map<Player, Integer> scoreTable = new HashMap<>();
     @Getter
     Player mainPlayer;
+    private transient Client client = new Client();
     private final InputState inputState;
     public Game(InputState inputState) {
         this.inputState = inputState;
@@ -41,6 +48,14 @@ public class Game implements Runnable {
         this.scoreTable = gameToLoad.scoreTable;
     }
 
+    public Player getPlayerById(int id){
+        for(int i = 0; i < players.size(); i++){
+            if(players.get(i).getID() == id){
+                return players.get(i);
+            }
+        }
+        return null;
+    }
 
 
     @Override
@@ -50,11 +65,25 @@ public class Game implements Runnable {
         double delta = 0;
         int ticks = 0;
 
-        mainPlayer = new Player(new Point2D.Float(100,100), Color.CYAN, Player.getNextID());
-        players.add(mainPlayer);
+        //mainPlayer = new Player(new Point2D.Float(100,100), Color.CYAN, Player.getNextID());
+        //players.add(mainPlayer);
+
+
+
+
+        //establish connection
+        client.establishConnection();
+        Game retrievedGameStatusFromServer = client.loadGame();
+        if(retrievedGameStatusFromServer != null){
+            loadGame(retrievedGameStatusFromServer);
+        }
+
+        client.setPlayerId(client.loadPlayerId());
+
+        mainPlayer = getPlayerById(client.getPlayerId());
+
 
         while (!Thread.interrupted()) {
-
             long now = System.nanoTime();
             delta += (now - lastTime) / (double) TARGET_TIME;
             lastTime = now;
@@ -66,6 +95,12 @@ public class Game implements Runnable {
             }
 
             if (System.currentTimeMillis() - timer > 1000) {
+
+                retrievedGameStatusFromServer = client.loadGame();
+                if(retrievedGameStatusFromServer != null){
+                    loadGame(retrievedGameStatusFromServer);
+                }
+                mainPlayer = getPlayerById(client.getPlayerId());
 
                 System.out.println("TICK RATE: " + ticks);
                 ticks = 0;
@@ -90,11 +125,19 @@ public class Game implements Runnable {
                     }
                 }
 
-
+                //send the player event
+                try{
+                    client.sendEvent("emptyTest");
+                }catch(IOException io){
+                    io.printStackTrace();
+                }
 
 
             }
+
+
         }
+        client.closeConnection();
     }
 
     public PowerUp createPowerUp(){
