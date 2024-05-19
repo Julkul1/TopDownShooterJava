@@ -1,7 +1,7 @@
 package project.gamelogic;
 
 import project.gamelogic.objects.*;
-import project.InputState;
+import project.input.InputState;
 import project.gamelogic.objects.basic.StaticObject;
 import project.gamelogic.objects.basic.Status;
 import project.window.PaintingConstants;
@@ -12,13 +12,14 @@ import java.awt.geom.Point2D;
 import java.util.*;
 import java.util.List;
 
-public class Game implements Runnable {
-    private static final int TARGET_TICK_RATE = 120;
-    private static final long TARGET_TIME = 1000000000 / TARGET_TICK_RATE;
+public class Game {
     private static final int pointsToWin = 100;
     private static final int pointsPerKill = 5;
 
+<<<<<<< Updated upstream
     private int timeToCreatePowerUp = 5;
+=======
+>>>>>>> Stashed changes
     @Getter
     private List<Player> players =  new LinkedList<>();
     @Getter
@@ -26,6 +27,7 @@ public class Game implements Runnable {
     @Getter
     private List<PowerUp> powerUps = new LinkedList<>();
     private Map<Player, Integer> scoreTable = new HashMap<>();
+<<<<<<< Updated upstream
     @Getter
     Player mainPlayer;
     private final InputState inputState;
@@ -63,21 +65,74 @@ public class Game implements Runnable {
                     timeToCreatePowerUp = 5;
                 }
             }
-        }
+=======
+
+    void loadGame(Game gameToLoad){
+        this.players = gameToLoad.players;
+        this.bullets = gameToLoad.bullets;
+        this.powerUps = gameToLoad.powerUps;
+        this.scoreTable = gameToLoad.scoreTable;
     }
 
-    public PowerUp createPowerUp(){
+    public Point2D.Float getRandomLocation(boolean doesCollide, float radius, float bonusRadius, Class<? extends StaticObject>... classes) {
         Random rand = new Random();
-        int y = rand.nextInt(GameMap.HEIGHT);
-        int x = rand.nextInt(GameMap.WIDTH);
-        return new PowerUp(new Point2D.Float(x,y));
+        int x = 0, y = 0;
+
+        if (doesCollide) {
+            List<StaticObject> collisionObjects = new ArrayList<>();
+            if (classes.length == 0) return null;
+            // Get with what the random location cannot collie with
+            for (Class<? extends StaticObject> clazz : classes) {
+                if (Player.class.isAssignableFrom(clazz)) {
+                    collisionObjects.addAll(players);
+                }
+                else if (Bullet.class.isAssignableFrom(clazz)) {
+                    collisionObjects.addAll(bullets);
+                }
+                else if (PowerUp.class.isAssignableFrom(clazz)) {
+                    collisionObjects.addAll(powerUps);
+                }
+                else {
+                    return null;
+                }
+            }
+
+            Point2D.Float point = new Point2D.Float();
+
+            do {
+                point.x = rand.nextInt(GameMap.HEIGHT);
+                point.y = rand.nextInt(GameMap.WIDTH);
+            }while(collisionObjects.stream().anyMatch(obj -> obj.doesCollide(point, radius, bonusRadius)));
+            x = (int)point.x;
+            y = (int)point.y;
+
+>>>>>>> Stashed changes
+        }
+        else {
+            y = rand.nextInt(GameMap.HEIGHT);
+            x = rand.nextInt(GameMap.WIDTH);
+        }
+        return new Point2D.Float(x, y);
+    }
+
+    public void createPowerUp(){
+        Point2D.Float point = getRandomLocation(false, PowerUp.RADIUS, 0);
+        powerUps.add(new PowerUp(point));
+    }
+
+    public void newPlayerLocation(Player player) {
+        Point2D.Float newPosition = this.getRandomLocation(true, player.getRadius(), 60f, Player.class, Bullet.class);
+        player.setCenter(newPosition);
     }
 
     public void update(double deltaTime) {
-        updatePlayerControl(mainPlayer.getID(), deltaTime);
+        // Create power ups on the map
+        PowerUp.updateGlobal(deltaTime, this);
 
-        mainPlayer.update(deltaTime);
-        collide(mainPlayer);
+        for (Player player : players) {
+            player.update(deltaTime);
+            collide(player);
+        }
 
         for (Bullet bullet : bullets) {
             bullet.update(deltaTime);
@@ -88,14 +143,22 @@ public class Game implements Runnable {
         while (iterator.hasNext()) {
             PowerUp powerUp = iterator.next();
             powerUp.update(deltaTime);
-            if (powerUp.isRemove()) {
+            if (powerUp.getStatus() == Status.DEAD) {
                 iterator.remove();
             }
         }
 
         bullets.removeIf(bullet -> bullet.getStatus() == Status.DEAD);
+        powerUps.removeIf(powerUp -> powerUp.getStatus() == Status.DEAD);
+        players.stream().filter(p -> p.getStatus() == Status.DEAD).forEach(player -> {
+            player.setHitPoints(GameObjectsConstants.Player.HIT_POINTS);
+            newPlayerLocation(player);
+        });
+
+
     }
 
+    // Function checks if object is dead so it aka don't exist, so it skips it in further processing
     private void collide(StaticObject object) {
         if (GameMap.doesCollide(object)) {
             GameMap.collide(object);
@@ -135,7 +198,9 @@ public class Game implements Runnable {
 
     }
 
-    public void updatePlayerControl(int playerID, double deltaTime) {
+    public void updatePlayerControl(InputState inputState, int playerID) {
+        Player player = getPlayerByID(playerID);
+        if (player == null) return;
         float x = 0, y = 0;
         boolean isMoving = false;
         if (inputState.isUpKeyPressed()) {
@@ -155,30 +220,42 @@ public class Game implements Runnable {
             isMoving = true;
         }
 
+<<<<<<< Updated upstream
         if (inputState.isLeftMouseClick()) {
             inputState.setLeftMouseClick(false);
             addBullet(mainPlayer);
         }
+=======
+        player.setShooting(inputState.isLeftMouseClick());
+>>>>>>> Stashed changes
 
         float centerX = (float)PaintingConstants.View.WIDTH / 2;
         float centerY = (float)PaintingConstants.View.HEIGHT / 2;
         double facingAngle = Math.atan2(inputState.getCursorY() - centerY, inputState.getCursorX() - centerX);
         double moveAngle = Math.atan2(y - 0.0, x - 0.0);
 
-        mainPlayer.setMoveAngle(moveAngle);
-        mainPlayer.setFacingAngle(facingAngle);
-        mainPlayer.setMoving(isMoving);
+        player.setMoveAngle(moveAngle);
+        player.setFacingAngle(facingAngle);
+        player.setMoving(isMoving);
     }
 
     public void addPlayer(Player newPlayer) {
+        newPlayerLocation(newPlayer);
         players.add(newPlayer);
         scoreTable.put(newPlayer, 0);
     }
 
     public void addBullet(Player creator) {
-        float x = creator.getCenter().x + PaintingConstants.Player.Barrel.WIDTH * (float)Math.cos(creator.getFacingAngle());
-        float y = creator.getCenter().y + PaintingConstants.Player.Barrel.WIDTH * (float)Math.sin(creator.getFacingAngle());
+        // Create bullet in front of barrel of a player
+        float x = creator.getCenter().x + PaintingConstants.Player_Paint.Barrel.WIDTH * (float)Math.cos(creator.getFacingAngle());
+        float y = creator.getCenter().y + PaintingConstants.Player_Paint.Barrel.WIDTH * (float)Math.sin(creator.getFacingAngle());
 
-        bullets.add(new Bullet(creator, new Point2D.Float(x, y), creator.getColor(), creator.getFacingAngle(), creator.getStrength()));
+        bullets.add(new Bullet(creator, new Point2D.Float(x, y), creator.getFacingAngle(), creator.getStrength()));
+    }
+
+    public Player getPlayerByID(int playerID) {
+        Optional<Player> optionalPlayer = players.stream().filter(p -> p.getID() == playerID).findFirst();
+        // Didn't find player with a correct ID return null else player object
+        return optionalPlayer.orElse(null);
     }
 }

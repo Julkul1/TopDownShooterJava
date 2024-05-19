@@ -1,14 +1,20 @@
 package project.window;
 
+import project.gamelogic.GameMap;
+
+import java.awt.*;
+
 public interface PaintingConstants {
     interface View {
         int WIDTH = 1280;
         int HEIGHT = 720;
     }
 
-    interface Player {
-        int RADIUS = 40;
+    interface Player_Paint {
         float OUTLINE_THICKNESS = 4.0f;
+        Color COLOR_ENEMY = Color.RED;
+        Color COLOR_FRIENDLY = Color.BLUE;
+
         interface Barrel {
             int WIDTH = 120;
             int HEIGHT = 20;
@@ -19,7 +25,13 @@ public interface PaintingConstants {
 
     }
 
-    interface Map {
+    interface PowerUp_Paint {
+        Color COLOR = Color.GREEN;
+    }
+
+    interface Map_Paint {
         float OUTLINE_THICKNESS = 30.0f;
+        float WIDTH = GameMap.WIDTH + OUTLINE_THICKNESS;
+        float HEIGHT = GameMap.HEIGHT + OUTLINE_THICKNESS;
     }
 }

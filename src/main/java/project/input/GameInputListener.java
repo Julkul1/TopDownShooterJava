@@ -1,4 +1,6 @@
-package project;
+package project.input;
+
+import project.input.InputState;
 
 import java.awt.event.*;
 
@@ -89,7 +91,7 @@ public class GameInputListener implements KeyListener, MouseListener, MouseMotio
 
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
-
+        mouseMoved(mouseEvent);
     }
 
     @Override
