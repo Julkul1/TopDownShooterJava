@@ -31,10 +31,17 @@ public class Game implements Runnable {
     Player mainPlayer;
     private final InputState inputState;
     public Game(InputState inputState) {
-        mainPlayer = new Player(new Point2D.Float(100,100), Color.CYAN, Player.getNextID());
-        players.add(mainPlayer);
         this.inputState = inputState;
     }
+
+    void loadGame(Game gameToLoad){
+        this.players = gameToLoad.players;
+        this.bullets = gameToLoad.bullets;
+        this.powerUps = gameToLoad.powerUps;
+        this.scoreTable = gameToLoad.scoreTable;
+    }
+
+
 
     @Override
     public void run() {
@@ -43,7 +50,11 @@ public class Game implements Runnable {
         double delta = 0;
         int ticks = 0;
 
+        mainPlayer = new Player(new Point2D.Float(100,100), Color.CYAN, Player.getNextID());
+        players.add(mainPlayer);
+
         while (!Thread.interrupted()) {
+
             long now = System.nanoTime();
             delta += (now - lastTime) / (double) TARGET_TIME;
             lastTime = now;
@@ -55,6 +66,7 @@ public class Game implements Runnable {
             }
 
             if (System.currentTimeMillis() - timer > 1000) {
+
                 System.out.println("TICK RATE: " + ticks);
                 ticks = 0;
                 timer += 1000;
@@ -77,6 +89,7 @@ public class Game implements Runnable {
                         }
                     }
                 }
+
 
 
 

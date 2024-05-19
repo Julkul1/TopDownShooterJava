@@ -2,6 +2,8 @@ package project.server;
 import java.net.*;
 import java.io.*;
 
+import project.gamelogic.Game;
+
 
 class Signaller{
     public Boolean createSignal;
@@ -23,15 +25,20 @@ class ServerThread implements Runnable{
     private Socket connectionSocket = null;
     private ObjectOutputStream outputStream = null;
     private ObjectInputStream inputStream = null;
+    private Game gameState;
+
 
     //other fields
     private Signaller serverThreadSignaller = null;
     private Integer id;
 
-    public ServerThread(ServerSocket socket, Signaller signaller, Integer threadNo){
+    public ServerThread(ServerSocket socket, Signaller signaller, Integer threadNo, Game gameState){
         this.serverSocket = socket;
         this.serverThreadSignaller = signaller;
         this.id = threadNo;
+        this.gameState = gameState;
+
+
     }
 
     private void handleConnection() throws IOException{
@@ -40,10 +47,26 @@ class ServerThread implements Runnable{
         synchronized(serverThreadSignaller){
             serverThreadSignaller.release();
         }
+        this.outputStream = new ObjectOutputStream(connectionSocket.getOutputStream());
+        this.inputStream = new ObjectInputStream(connectionSocket.getInputStream());
 
         /*
         Code for handling the client including any communication goes below.
          */
+
+        //writes game state to the client, not handled on the client side yet
+        outputStream.writeObject(gameState);
+        try{
+            //get events from user
+            inputStream.readObject();
+
+            /*
+            Update the game state based on events received from user
+             */
+        }catch(ClassNotFoundException cnfe){
+            cnfe.printStackTrace();
+        }
+
 
     }
 
@@ -65,6 +88,7 @@ public class Server {
     private Integer port = null;
     private ServerSocket serverSocket = null;
     private Integer lastThreadId = 0;
+    private Game gameState = new Game(null);
 
     void NetworkCreateServer(Integer port) throws IOException{
         this.port = port;
@@ -89,7 +113,7 @@ public class Server {
 
                         System.out.println("Called new thread creation");
 
-                        ServerThread serverInstance = new ServerThread(serverSocket, serverSignaller, lastThreadId);
+                        ServerThread serverInstance = new ServerThread(serverSocket, serverSignaller, lastThreadId, gameState);
                         lastThreadId += 1;
                         Thread serverThread = new Thread(serverInstance);
 
@@ -106,9 +130,13 @@ public class Server {
     }
     public static void main( String[] args )
     {
+
         System.out.println("Beginning of the Server.java main function.");
 
-        Server myServer = new Server(3113);
+        final int port = 3113;
+
+
+        Server myServer = new Server(port);
 
     }
 }

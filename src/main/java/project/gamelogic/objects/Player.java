@@ -8,6 +8,8 @@ import project.gamelogic.objects.basic.Status;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.net.*;
+import java.io.*;
 
 public class Player extends RotatingObject implements GameObjectsConstants.Player {
     @Getter
@@ -17,6 +19,8 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
     private static int globalID = 0;
     private int shootingDelay = 1;
     private boolean didShoot = false;
+
+
 
     public int getShootingDelay(){
         return shootingDelay;
@@ -41,6 +45,8 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
         this.ID = ID;
         hitPoints = HIT_POINTS;
         strength = STRENGTH;
+
+
     }
 
     public static int getNextID() {
