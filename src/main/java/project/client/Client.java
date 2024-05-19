@@ -1,6 +1,7 @@
 package project.client;
 
 import lombok.Getter;
+import lombok.Setter;
 import project.gamelogic.Game;
 import project.gamelogic.objects.Player;
 import project.input.GameInputListener;
@@ -9,6 +10,10 @@ import project.window.GameWindow;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
 public class Client implements Runnable {
     //  Game state members
@@ -17,13 +22,20 @@ public class Client implements Runnable {
     private final GameWindow gameWindow;
     private final InputState inputState;
     private final GameInputListener gameInputListener;
-    @Getter
+    @Getter @Setter
     private int playerID;
     // Game tick rate members
     private static final int TARGET_TICK_RATE = 120;
     private static final int NANOS_IN_SECOND = 1000000000;
 
     private static final long TARGET_TIME = NANOS_IN_SECOND / TARGET_TICK_RATE;
+
+    // Server connection data
+    private Socket playerSocket = null;
+    private ObjectOutputStream playerOutputStream = null;
+    private ObjectInputStream playerInputStream = null;
+    private String IPAddress = "127.0.0.1";
+    private int port = 3113;
 
 
 
@@ -43,18 +55,25 @@ public class Client implements Runnable {
 
     private void init() {
         playerID = 1;
-        Player player = new Player(null, 1, game);
+        Player player = new Player(null, 1);
         game.addPlayer(player);
 
     }
 
     public void run() {
-        this.init();
+        //this.init();
         long lastTime = System.nanoTime();
         long timer = System.currentTimeMillis();
         double delta = 0;
         double deltaTime = 0;
         int ticks = 0;
+
+        establishConnection();
+        do {
+            game = loadGame();
+        }while(game == null);
+
+        playerID = loadPlayerId();
 
 
         while (!Thread.interrupted()) {
@@ -63,6 +82,12 @@ public class Client implements Runnable {
             deltaTime += (now - lastTime) / (double)NANOS_IN_SECOND;
             delta += (now - lastTime) / (double) TARGET_TIME;
             lastTime = now;
+
+            /*
+            do {
+                game = loadGame();
+            }while(game == null);
+            */
 
             // Update game and window
             while (delta >= 1) {
@@ -74,6 +99,7 @@ public class Client implements Runnable {
                     gameWindow.repaint();
                 }
                 deltaTime -= delta * TARGET_TIME / NANOS_IN_SECOND;
+                deltaTime = Math.max(deltaTime, 0.00001);
                 delta--;
                 ticks++;
             }
@@ -84,6 +110,69 @@ public class Client implements Runnable {
                 ticks = 0;
                 timer += 1000;
             }
+
+            try{
+                sendEvent("emptyTest");
+            }catch(IOException io){
+                io.printStackTrace();
+            }
+        }
+        closeConnection();
+    }
+
+    public Game loadGame(){
+        try{
+            game = (Game)playerInputStream.readObject();
+            return game;
+        }
+        catch(IOException i){
+            i.printStackTrace();
+        }
+        catch(ClassNotFoundException c){
+            c.printStackTrace();
+        }
+
+        return null;
+    }
+    public int loadPlayerId(){
+        try{
+            return (int)playerInputStream.readObject();
+        }
+        catch(IOException i){
+            i.printStackTrace();
+        }
+        catch(ClassNotFoundException c){
+            c.printStackTrace();
+        }
+
+        return -1;
+    }
+
+    public void sendEvent(String eventType) throws IOException{
+
+        switch(eventType){
+            case "emptyTest":
+                //empty message for testing
+                //playerOutputStream.writeObject(0);
+        }
+    }
+    public void establishConnection(){
+        try{
+            playerSocket = new Socket(IPAddress, port);
+            playerOutputStream = new ObjectOutputStream(playerSocket.getOutputStream());
+            playerInputStream = new ObjectInputStream(playerSocket.getInputStream());
+        }
+        catch(IOException i){
+            i.printStackTrace();
+            System.out.println("Error: connection refused on socket " + IPAddress+":"+port);
+            System.exit(-1);
+        }
+    }
+    public void closeConnection(){
+        try {
+            playerSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

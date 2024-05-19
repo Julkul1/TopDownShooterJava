@@ -37,7 +37,7 @@ abstract public class StaticObject implements Serializable {
     }
 
     public boolean doesCollide(Point2D.Float center, float radius, float bonusDistance) {
-        return center.distance(center) < this.radius + radius + bonusDistance;
+        return this.center.distance(center) < this.radius + radius + bonusDistance;
     }
 
 }

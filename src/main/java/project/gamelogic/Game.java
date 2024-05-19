@@ -9,10 +9,11 @@ import lombok.Getter;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 import java.util.*;
 import java.util.List;
 
-public class Game {
+public class Game implements Serializable {
     private static final int pointsToWin = 100;
     private static final int pointsPerKill = 5;
 
@@ -84,9 +85,14 @@ public class Game {
     public void update(double deltaTime) {
         // Create power ups on the map
         PowerUp.updateGlobal(deltaTime, this);
+        Command command = new Command();
 
         for (Player player : players) {
-            player.update(deltaTime);
+            command.setValue("");
+            player.update(deltaTime, command);
+            if (command.getValue().equals("Add bullet")) {
+                addBullet(player);
+            }
             collide(player);
         }
 
@@ -108,6 +114,7 @@ public class Game {
         powerUps.removeIf(powerUp -> powerUp.getStatus() == Status.DEAD);
         players.stream().filter(p -> p.getStatus() == Status.DEAD).forEach(player -> {
             player.setHitPoints(GameObjectsConstants.Player.HIT_POINTS);
+            player.setStatus(Status.ALIVE);
             newPlayerLocation(player);
         });
 

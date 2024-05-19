@@ -1,5 +1,6 @@
 package project.gamelogic.objects;
 
+import project.gamelogic.Command;
 import project.gamelogic.Game;
 import project.gamelogic.objects.basic.RotatingObject;
 import project.gamelogic.objects.basic.StaticObject;
@@ -20,14 +21,12 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
     @Getter @Setter private float strength;
     @Getter @Setter private boolean isShooting = false;
     private float shootingDelay = 0.0F;
-    private final Game game;
 
-    public Player(Point2D.Float center, int ID, Game game) {
+    public Player(Point2D.Float center, int ID) {
         super(center, RADIUS, 0.0, SPEED, 0.0);
         this.ID = ID;
         hitPoints = HIT_POINTS;
         strength = STRENGTH;
-        this.game = game;
     }
 
     public static int getNextID() {
@@ -39,14 +38,14 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
         globalID = 0;
     }
 
-    @Override
-    public void update(double deltaTime) {
+
+    public void update(double deltaTime, Command command) {
         super.update(deltaTime);
         shootingDelay -= (float)deltaTime;
 
         if (isShooting && shootingDelay <= 0) {
             shootingDelay += SHOOT_DELTA;
-            game.addBullet(this);
+            command.setValue("Add bullet");;
         }
 
         // if shooting delay is less than 0 set 0

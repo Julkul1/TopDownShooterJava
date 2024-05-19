@@ -40,27 +40,25 @@ public class GameWindow extends JPanel implements PaintingConstants {
     private void drawPlayer(Graphics2D g2) {
         Stroke oldStroke = g2.getStroke();
 
-        int viewCenterX = View.WIDTH / 2;
-        int viewCenterY = View.HEIGHT / 2;
-
         for (Player player : game.getPlayers()) {
             if (player.getID() == mainPlayerID) continue; // skip main player in drawing
 
-            int playerX = viewCenterX - (int) player.getRadius();
-            int playerY = viewCenterY - (int) player.getRadius();
-            int playerDiameter = (int) player.getRadius() * 2;
+            Point2D.Float center = player.getCenter();
+            int playerX = (int)center.getX() - (int)player.getRadius();
+            int playerY = (int)center.getY() - (int)player.getRadius();
+            int playerDiameter = (int)player.getRadius() * 2;
 
-            int barrelX = viewCenterX - Player_Paint.Barrel.ROTATION_PIVOT_X;
-            int barrelY = viewCenterY - Player_Paint.Barrel.ROTATION_PIVOT_Y;
+            int barrelX = (int)center.getX() - Player_Paint.Barrel.ROTATION_PIVOT_X;
+            int barrelY = (int)center.getY() - Player_Paint.Barrel.ROTATION_PIVOT_Y;
 
             // Paint barrel
-            g2.rotate(player.getFacingAngle(), viewCenterX, viewCenterY);
+            g2.rotate(player.getFacingAngle(), playerX, playerY);
             g2.setStroke(new BasicStroke(Player_Paint.Barrel.OUTLINE_THICKNESS));
             g2.setColor(Color.GRAY);
             g2.fillRect(barrelX, barrelY, Player_Paint.Barrel.WIDTH, Player_Paint.Barrel.HEIGHT);
             g2.setColor(Color.BLACK);
             g2.drawRect(barrelX, barrelY, Player_Paint.Barrel.WIDTH, Player_Paint.Barrel.HEIGHT);
-            g2.rotate(-player.getFacingAngle(), viewCenterX, viewCenterY);
+            g2.rotate(-player.getFacingAngle(), playerX, playerY);
 
             // Paint player
             g2.setStroke(new BasicStroke(Player_Paint.OUTLINE_THICKNESS));
