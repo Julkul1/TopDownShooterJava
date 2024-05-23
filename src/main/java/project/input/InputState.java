@@ -2,7 +2,10 @@ package project.input;
 
 import lombok.Setter;
 import lombok.Getter;
-public class InputState {
+
+import java.io.Serializable;
+
+public class InputState implements Serializable {
     @Getter @Setter private boolean downKeyPressed;
     @Getter @Setter private boolean upKeyPressed;
     @Getter @Setter private boolean rightKeyPressed;
