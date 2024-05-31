@@ -3,7 +3,6 @@ package project.window;
 import project.client.Client;
 import project.input.GameInputListener;
 import project.gamelogic.Game;
-import project.gamelogic.GameMap;
 import project.gamelogic.objects.Bullet;
 import project.gamelogic.objects.Player;
 import project.gamelogic.objects.PowerUp;
@@ -52,13 +51,13 @@ public class GameWindow extends JPanel implements PaintingConstants {
             int barrelY = (int)center.getY() - Player_Paint.Barrel.ROTATION_PIVOT_Y;
 
             // Paint barrel
-            g2.rotate(player.getFacingAngle(), playerX, playerY);
+            g2.rotate(player.getFacingAngle(), (int)center.getX(), (int)center.getY());
             g2.setStroke(new BasicStroke(Player_Paint.Barrel.OUTLINE_THICKNESS));
             g2.setColor(Color.GRAY);
             g2.fillRect(barrelX, barrelY, Player_Paint.Barrel.WIDTH, Player_Paint.Barrel.HEIGHT);
             g2.setColor(Color.BLACK);
             g2.drawRect(barrelX, barrelY, Player_Paint.Barrel.WIDTH, Player_Paint.Barrel.HEIGHT);
-            g2.rotate(-player.getFacingAngle(), playerX, playerY);
+            g2.rotate(-player.getFacingAngle(), (int)center.getX(), (int)center.getY());
 
             // Paint player
             g2.setStroke(new BasicStroke(Player_Paint.OUTLINE_THICKNESS));

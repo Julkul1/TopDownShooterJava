@@ -8,7 +8,7 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) {
-        Game objectToSerialize = new Game();
+        Game objectToSerialize = new Game(true);
         int id = Player.getNextID();
         Player newPlayer = new Player(null, id);
         objectToSerialize.addPlayer(newPlayer);

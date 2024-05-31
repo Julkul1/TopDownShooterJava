@@ -1,25 +1,27 @@
 package project.server;
 import lombok.Getter;
 import project.Message;
+import project.client.ClientStatus;
+import project.client.StatusData;
 import project.gamelogic.Game;
 import project.gamelogic.objects.Player;
 import project.input.InputState;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.io.*;
 import java.net.*;
 
 public class Server {
+    ////////////////////////////////////////
+    /////////////  MEMBERS  ////////////////
+    ////////////////////////////////////////
+
     @Getter
-    private final Game game = new Game();
+    private final Game game = new Game(true);
     public static int PORT = 9876;
     public static String HOST_NAME = "localhost";
     public static int TIME_TILL_TIMEOUT = 10; // ms
@@ -31,67 +33,124 @@ public class Server {
     private static final int TARGET_TICK_RATE = 120;
     private static final int NANOS_IN_SECOND = 1000000000;
     private static final long TARGET_TIME = NANOS_IN_SECOND / TARGET_TICK_RATE;
+    // Lobby members
+    private static final int PLAYERS_REQUIRED_TO_START = 2;
+    private static final int LOBBY_START_COUNTDOWN = 10;
 
-    public static void main(String[] args) throws InterruptedException {
+
+    ////////////////////////////////////////
+    /////////////  METHODS  ////////////////
+    ////////////////////////////////////////
+
+    public static void main(String[] args) {
         Server server = new Server();
         server.run();
     }
 
     public void run() {
-        game.addPlayer(new Player(null, 1));
+        try (DatagramSocket serverSocket = new DatagramSocket(PORT)) {
+            System.out.println("Server started");
+            serverSocket.setSoTimeout(TIME_TILL_TIMEOUT);
+            startLobby(serverSocket);
+            System.out.println("Game Started");
+            startGame(serverSocket);
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void startLobby(DatagramSocket serverSocket) throws IOException, ClassNotFoundException {
+        long lastTime = System.nanoTime();
+        long timer = System.currentTimeMillis();
+        double delta = 0;
+        double deltaTime = 0;
+        int ticks = 0;
+        double lobbyStartTimer = LOBBY_START_COUNTDOWN;
+        int playersReady = 0;
+
+        while (!Thread.interrupted() && !game.isGameStarted()) {
+
+            long now = System.nanoTime();
+            deltaTime += (now - lastTime) / (double) NANOS_IN_SECOND;
+            delta += (now - lastTime) / (double) TARGET_TIME;
+            lastTime = now;
+
+            while (delta >= 1) {
+                if (ticks % 3 == 0) {
+                    readClientsInput(serverSocket);
+                    updatePlayersStatus();
+                    playersReady = getNumberOfReadyPlayers();
+                    if (lobbyStartTimer <= 0) {
+                        game.setGameStarted(true);
+                    }
+                    // Send new ids or lobby data to clients
+                    // These methods guarantee only 1 type of data will be sent
+                    sendIDDataToClients(serverSocket);
+                    sendLobbyDataToClients(serverSocket, (int)lobbyStartTimer);
+                }
+
+                if (playersReady == clientAdressMap.size() && playersReady >= PLAYERS_REQUIRED_TO_START) {
+                    lobbyStartTimer -= deltaTime;
+                }
+
+                deltaTime -= delta * TARGET_TIME / NANOS_IN_SECOND;
+                deltaTime = Math.max(deltaTime, 0.00001);
+                delta--;
+                ticks++;
+            }
+
+            // Print tick rate
+            if (System.currentTimeMillis() - timer > 1000) {
+                //System.out.println("TICK RATE: " + ticks);
+                ticks = 0;
+                timer += 1000;
+            }
+        }
+    }
+
+    private void startGame(DatagramSocket serverSocket) throws IOException, ClassNotFoundException {
         long lastTime = System.nanoTime();
         long timer = System.currentTimeMillis();
         double delta = 0;
         double deltaTime = 0;
         int ticks = 0;
 
-        try (DatagramSocket serverSocket = new DatagramSocket(PORT)) {
-            serverSocket.setSoTimeout(TIME_TILL_TIMEOUT);
+        while (!Thread.interrupted()) {
 
+            long now = System.nanoTime();
+            deltaTime += (now - lastTime) / (double) NANOS_IN_SECOND;
+            delta += (now - lastTime) / (double) TARGET_TIME;
+            lastTime = now;
 
-            while (!Thread.interrupted()) {
+            while (delta >= 1) {
+                // Update player input before game
+                game.update(deltaTime);
 
-                long now = System.nanoTime();
-                deltaTime += (now - lastTime) / (double) NANOS_IN_SECOND;
-                delta += (now - lastTime) / (double) TARGET_TIME;
-                lastTime = now;
-
-
-                // Update game and window
-                while (delta >= 1) {
-                    // Update player input before game
-                    game.update(deltaTime);
-
-                    if (ticks % 3 == 0) {
-                        readClientsInput(serverSocket);
-                        manipulateClientsInput();
-                        sendDataToClients(serverSocket);
-                    }
-
-
-                    deltaTime -= delta * TARGET_TIME / NANOS_IN_SECOND;
-                    deltaTime = Math.max(deltaTime, 0.00001);
-                    delta--;
-                    ticks++;
+                if (ticks % 3 == 0) {
+                    readClientsInput(serverSocket);
+                    manipulateClientsInput();
+                    sendDataToClients(serverSocket);
                 }
 
-                // Print tick rate
-                if (System.currentTimeMillis() - timer > 1000) {
-                    System.out.println("TICK RATE: " + ticks);
-                    ticks = 0;
-                    timer += 1000;
-                }
-
+                deltaTime -= delta * TARGET_TIME / NANOS_IN_SECOND;
+                deltaTime = Math.max(deltaTime, 0.00001);
+                delta--;
+                ticks++;
             }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+
+            // Print tick rate
+            if (System.currentTimeMillis() - timer > 1000) {
+                //System.out.println("TICK RATE: " + ticks);
+                ticks = 0;
+                timer += 1000;
+            }
         }
     }
 
     private void readClientsInput(DatagramSocket serverSocket) throws IOException, ClassNotFoundException {
         lastConnectedClients.clear();
         byte[] receiveData = new byte[RECEIVE_DATA_ARRAY_SIZE];
+
         while (true) {
             try {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
@@ -111,12 +170,18 @@ public class Server {
                 // Add data to latest data to client
                 ClientDataKey clientDataKey = new ClientDataKey(receivePacket.getAddress(), receivePacket.getPort());
                 if (!clientAdressMap.containsKey(clientDataKey)) {
+                    // Create new client
                     clientAdressMap.put(clientDataKey, new ClientData());
+                    int latestPlayerID = Player.getNextID();
+                    clientAdressMap.get(clientDataKey).setClientID(latestPlayerID);
+                    game.addPlayer(new Player(null, latestPlayerID));
                 }
                 if (clientAdressMap.get(clientDataKey).getLastPackageNum() < receivedMessage.getMessageNum()) {
                     clientAdressMap.get(clientDataKey).setObjectReceived(receivedMessage.getData());
                     clientAdressMap.get(clientDataKey).setLastPackageNum(receivedMessage.getMessageNum());
-                    lastConnectedClients.add(clientDataKey);
+                    if (!lastConnectedClients.contains(clientDataKey)) {
+                        lastConnectedClients.add(clientDataKey);
+                    }
                 }
 
             } catch (SocketTimeoutException e) {
@@ -136,6 +201,40 @@ public class Server {
             byte[] sendData = baos.toByteArray();
 
             for (ClientDataKey clientKey : lastConnectedClients) {
+                if (clientAdressMap.get(clientKey).clientStatus == ClientStatus.PLAYING) {
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, clientKey.getAddress(), clientKey.getPort());
+                    serverSocket.send(sendPacket);
+                }
+                else if (clientAdressMap.get(clientKey).clientStatus == ClientStatus.WAITING_IN_LOBBY) {
+                    sendLobbyDataToClients(serverSocket, 0);
+                    updatePlayersStatus();
+                }
+                else if (clientAdressMap.get(clientKey).clientStatus == ClientStatus.WAITING_FOR_ID) {
+                    sendIDDataToClients(serverSocket);
+                    updatePlayersStatus();
+                }
+            }
+
+            latestServerPackageNum += 1;
+        }
+    }
+
+    private void sendIDDataToClients(DatagramSocket serverSocket) throws IOException {
+        if (lastConnectedClients.size() > 0) {
+            for (ClientDataKey clientKey : lastConnectedClients) {
+                if (clientAdressMap.get(clientKey).getClientStatus() != ClientStatus.WAITING_FOR_ID) {
+                    continue;
+                }
+
+                StatusData statusData = new StatusData(clientAdressMap.get(clientKey).getClientID());
+                Message message = new Message(statusData, latestServerPackageNum);
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(message);
+                oos.flush();
+                byte[] sendData = baos.toByteArray();
+
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, clientKey.getAddress(), clientKey.getPort());
                 serverSocket.send(sendPacket);
             }
@@ -144,10 +243,60 @@ public class Server {
         }
     }
 
+    private void sendLobbyDataToClients(DatagramSocket serverSocket, int lobbyTimer) throws IOException {
+        if (lastConnectedClients.size() > 0) {
+            LobbyData lobbyData = new LobbyData(getNumberOfReadyPlayers(), PLAYERS_REQUIRED_TO_START);
+            lobbyData.setGameStarted(game.isGameStarted());
+            lobbyData.setLobbyStartTimer(lobbyTimer);
+            Message message = new Message(lobbyData, latestServerPackageNum);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(message);
+            oos.flush();
+            byte[] sendData = baos.toByteArray();
+
+            for (ClientDataKey clientKey : lastConnectedClients) {
+                if (clientAdressMap.get(clientKey).clientStatus == ClientStatus.WAITING_IN_LOBBY) {
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, clientKey.getAddress(), clientKey.getPort());
+                    serverSocket.send(sendPacket);
+                }
+            }
+
+            latestServerPackageNum += 1;
+        }
+    }
+
+    private void updatePlayersStatus() {
+        for (ClientDataKey clientKey : lastConnectedClients) {
+            if (clientAdressMap.get(clientKey).getObjectReceived() instanceof StatusData) {
+                StatusData statusData = (StatusData)clientAdressMap.get(clientKey).getObjectReceived();
+                if (statusData.getClientStatus() == ClientStatus.WAITING_IN_LOBBY) {
+                    clientAdressMap.get(clientKey).setClientStatus(ClientStatus.WAITING_IN_LOBBY);
+                }
+            }
+            else {
+                clientAdressMap.get(clientKey).setClientStatus(ClientStatus.PLAYING);
+            }
+        }
+    }
+
+    private int getNumberOfReadyPlayers() {
+        int playersReady = 0;
+
+        for (ClientData status : clientAdressMap.values()) {
+            if (status.clientStatus != ClientStatus.WAITING_FOR_ID) {
+                playersReady++;
+            }
+        }
+
+        return playersReady;
+    }
+
     private void manipulateClientsInput() {
         for (ClientDataKey clientKey : lastConnectedClients) {
             if (clientAdressMap.get(clientKey).getObjectReceived() instanceof InputState) {
-                game.updatePlayerControl((InputState) clientAdressMap.get(clientKey).getObjectReceived(), 1);
+                game.updatePlayerControl((InputState) clientAdressMap.get(clientKey).getObjectReceived(), clientAdressMap.get(clientKey).getClientID());
             }
         }
     }

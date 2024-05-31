@@ -1,5 +1,6 @@
 package project.gamelogic;
 
+import lombok.Setter;
 import project.gamelogic.objects.*;
 import project.input.InputState;
 import project.gamelogic.objects.basic.StaticObject;
@@ -7,7 +8,6 @@ import project.gamelogic.objects.basic.Status;
 import project.window.PaintingConstants;
 import lombok.Getter;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.*;
@@ -24,6 +24,14 @@ public class Game implements Serializable {
     @Getter
     private List<PowerUp> powerUps = new LinkedList<>();
     private Map<Player, Integer> scoreTable = new HashMap<>();
+    @Getter @Setter
+    private boolean gameStarted = false;
+    @Getter
+    private final boolean isServer;
+
+    public Game(boolean isServer) {
+        this.isServer = isServer;
+    }
 
     void loadGame(Game gameToLoad){
         this.players = gameToLoad.players;
@@ -84,7 +92,9 @@ public class Game implements Serializable {
 
     public void update(double deltaTime) {
         // Create power ups on the map
-        PowerUp.updateGlobal(deltaTime, this);
+        if (isServer) {
+            PowerUp.updateGlobal(deltaTime, this);
+        }
         Command command = new Command();
 
         for (Player player : players) {
@@ -117,7 +127,6 @@ public class Game implements Serializable {
             player.setStatus(Status.ALIVE);
             newPlayerLocation(player);
         });
-
 
     }
 
