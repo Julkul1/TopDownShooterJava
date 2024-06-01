@@ -20,6 +20,7 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
     @Getter @Setter private float hitPoints;
     @Getter @Setter private float strength;
     @Getter @Setter private boolean isShooting = false;
+    @Getter @Setter private Player killedBy = null;
     private float shootingDelay = 0.0F;
 
     public Player(Point2D.Float center, int ID) {
@@ -60,6 +61,7 @@ public class Player extends RotatingObject implements GameObjectsConstants.Playe
                 hitPoints -= bullet.getDamage();
                 if (hitPoints <= 0) {
                     status = Status.DEAD;
+                    killedBy = bullet.getCreator();
                 }
                 bullet.setStatus(Status.DEAD);
             }

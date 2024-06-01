@@ -35,7 +35,7 @@ public class Server {
     private static final long TARGET_TIME = NANOS_IN_SECOND / TARGET_TICK_RATE;
     // Lobby members
     private static final int PLAYERS_REQUIRED_TO_START = 2;
-    private static final int LOBBY_START_COUNTDOWN = 10;
+    private static final int LOBBY_START_COUNTDOWN = 5;
 
 
     ////////////////////////////////////////

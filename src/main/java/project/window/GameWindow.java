@@ -6,16 +6,20 @@ import project.gamelogic.Game;
 import project.gamelogic.objects.Bullet;
 import project.gamelogic.objects.Player;
 import project.gamelogic.objects.PowerUp;
+import project.server.LobbyData;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.util.*;
+import java.util.List;
 
 public class GameWindow extends JPanel implements PaintingConstants {
     private final Client client;
 
     private int mainPlayerID;
     private Game game;
+    private LobbyData lobby;
 
     public GameWindow(Client client, GameInputListener gameInputListener) {
         SwingUtilities.invokeLater(() -> {
@@ -164,30 +168,129 @@ public class GameWindow extends JPanel implements PaintingConstants {
         g2.setStroke(oldStroke);
     }
 
+    private void drawScoreboard(Graphics2D g2, Player mainPlayer) {
+        Stroke oldStroke = g2.getStroke();
+        LinkedHashMap<Player, Integer> scoreTable = game.getScoreTable();
+
+        Font font = new Font("Arial", Font.BOLD, Scoreboard_Paint.FONT_SIZE);
+        g2.setFont(font);
+        FontMetrics metrics = g2.getFontMetrics(font);
+
+        // Text parameters
+        int widestTextWidth = 0;
+        int scoreboardX = View.WIDTH;
+        int lineHeight = metrics.getHeight();
+        int textY = Scoreboard_Paint.Y_OFFSET + metrics.getAscent();
+        int topY = textY;
+
+        // Print player's strength
+        String text = "Strength: " + mainPlayer.getStrength();
+        int textWidth = metrics.stringWidth(text);
+        int textX = (View.WIDTH - textWidth) / 2 + Scoreboard_Paint.X_OFFSET;
+        g2.drawString(text, textX, textY);
+        textY += 2 * lineHeight;
+        if (textWidth > widestTextWidth) widestTextWidth = textWidth;
+        if (textX < scoreboardX) scoreboardX = textX;
+
+        text = "Scoreboard:";
+        textWidth = metrics.stringWidth(text);
+        textX = (View.WIDTH - textWidth) / 2 + Scoreboard_Paint.X_OFFSET;
+        g2.drawString(text, textX, textY);
+        textY += lineHeight;
+        if (textWidth > widestTextWidth) widestTextWidth = textWidth;
+        if (textX < scoreboardX) scoreboardX = textX;
+
+        // Print players points
+        g2.setColor(Color.RED);
+        for (Player player : scoreTable.keySet()) {
+            if (player.getID() == mainPlayer.getID()) {
+                text = player.getID() + " (You): " + scoreTable.get(player);
+            }
+            else {
+                text = player.getID() + ": " + scoreTable.get(player);
+            }
+            textWidth = metrics.stringWidth(text);
+            textX = (View.WIDTH - textWidth) / 2 + Scoreboard_Paint.X_OFFSET;
+            g2.drawString(text, textX, textY);
+            textY += lineHeight;
+
+            if (textWidth > widestTextWidth) widestTextWidth = textWidth;
+            if (textX < scoreboardX) scoreboardX = textX;
+        }
+
+        // Print outline
+        int totalTextHeight = textY - topY;
+        g2.setColor(Color.BLACK);
+        g2.drawRect(scoreboardX - Scoreboard_Paint.OUTLINE_BONUS_WIDTH / 2, topY - metrics.getAscent(), widestTextWidth + Scoreboard_Paint.OUTLINE_BONUS_WIDTH, totalTextHeight);
+
+        g2.setStroke(oldStroke);
+    }
+
+    private void drawLobby(Graphics2D g2) {
+        Stroke oldStroke = g2.getStroke();
+
+        List<String> lobbyText = new ArrayList<>();
+        if (client.getPlayerID() > 0) {
+            lobbyText.add("Połączono z lobby");
+            lobbyText.add("Ilość graczy: " + lobby.getReadyPlayers());
+            lobbyText.add("Wymagana ilość graczy: " + lobby.getRequiredMinPlayers());
+            if (lobby.getReadyPlayers() >= lobby.getRequiredMinPlayers()) {
+                lobbyText.add("Gra rozpocznie się za " + lobby.getLobbyStartTimer() + "s");
+            }
+        }
+        else {
+            lobbyText.add("Dołączanie do lobby...");
+        }
+
+        Font font = new Font("Arial", Font.BOLD, Lobby_Paint.FONT_SIZE);
+        g2.setFont(font);
+        FontMetrics metrics = g2.getFontMetrics(font);
+        int lineHeight = metrics.getHeight();
+        int totalTextHeight = lobbyText.size() * lineHeight;
+        int textY = (View.HEIGHT - totalTextHeight) / 2 + metrics.getAscent();
+
+        g2.setColor(Color.RED);
+        for (String text : lobbyText) {
+            int textWidth = metrics.stringWidth(text);
+            int textX = (View.WIDTH - textWidth) / 2;
+            g2.drawString(text, textX, textY);
+            textY += lineHeight;
+        }
+
+        g2.setStroke(oldStroke);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         game = client.getGame();
-        mainPlayerID = client.getPlayerID();
-        Player mainPlayer = game.getPlayerByID(mainPlayerID);
-        if (mainPlayer == null) return;
+        lobby = client.getLobbyData();
 
-        // Translate every object based on player position so player is in the center of a frame
-        Graphics2D g2 = (Graphics2D) g;
-        int translateX = (int)mainPlayer.getCenter().getX() - View.WIDTH / 2;
-        int translateY = (int)mainPlayer.getCenter().getY() - View.HEIGHT / 2;
-        g2.translate(-translateX, -translateY);
+        if (lobby.isGameStarted()) {
+            mainPlayerID = client.getPlayerID();
+            Player mainPlayer = game.getPlayerByID(mainPlayerID);
+            if (mainPlayer == null) return;
 
-        drawMap(g2);
-        drawPlayer(g2);
-        drawBullets(g2);
-        drawPowerUp(g2);
+            // Translate every object based on player position so player is in the center of a frame
+            Graphics2D g2 = (Graphics2D) g;
+            int translateX = (int)mainPlayer.getCenter().getX() - View.WIDTH / 2;
+            int translateY = (int)mainPlayer.getCenter().getY() - View.HEIGHT / 2;
+            g2.translate(-translateX, -translateY);
 
-        g2.translate(translateX, translateY);
+            drawMap(g2);
+            drawPlayer(g2);
+            drawBullets(g2);
+            drawPowerUp(g2);
 
-        drawMainPlayer(g2, mainPlayer);
+            g2.translate(translateX, translateY);
 
+            drawScoreboard(g2, mainPlayer);
+            drawMainPlayer(g2, mainPlayer);
+        }
+        else {
+            Graphics2D g2 = (Graphics2D) g;
+            drawLobby(g2);
+        }
     }
-
 }

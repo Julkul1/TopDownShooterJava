@@ -28,6 +28,8 @@ public class Client {
     private final GameWindow gameWindow;
     private InputState inputState;
     private final GameInputListener gameInputListener;
+    @Getter
+    private LobbyData lobbyData;
     @Getter @Setter
     private int playerID;
 
@@ -57,6 +59,7 @@ public class Client {
         gameInputListener = new GameInputListener(inputState);
         game = new Game(false);
         gameWindow = new GameWindow(this, gameInputListener);
+        lobbyData = new LobbyData(0,1);
         playerID = 0;
     }
 
@@ -80,7 +83,6 @@ public class Client {
         double deltaTime = 0;
         int ticks = 0;
         StatusData statusData = new StatusData(ClientStatus.WAITING_FOR_ID);
-        LobbyData lobbyData = new LobbyData(0,1);
 
         while (!Thread.interrupted() && !lobbyData.isGameStarted()) {
             long now = System.nanoTime();
@@ -105,10 +107,10 @@ public class Client {
                     sendStatusToServer(clientSocket, statusData);
                 }
 
-                //TODO: Paint lobby window every 2 ticks (60 fps)
-                //if (ticks % 2 == 0) {
-                    //gameWindow.repaint();
-                //}
+                //Paint lobby window every 2 ticks (60 fps)
+                if (ticks % 2 == 0) {
+                    gameWindow.repaint();
+                }
 
                 deltaTime -= delta * TARGET_TIME / NANOS_IN_SECOND;
                 deltaTime = Math.max(deltaTime, 0.00001);

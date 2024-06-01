@@ -34,4 +34,15 @@ public interface PaintingConstants {
         float WIDTH = GameMap.WIDTH + OUTLINE_THICKNESS;
         float HEIGHT = GameMap.HEIGHT + OUTLINE_THICKNESS;
     }
+
+    interface Scoreboard_Paint {
+        int X_OFFSET = 550;
+        int Y_OFFSET = 20;
+        int FONT_SIZE = 16;
+        int OUTLINE_BONUS_WIDTH = 20;
+    }
+
+    interface Lobby_Paint {
+        int FONT_SIZE = 20;
+    }
 }

@@ -23,7 +23,8 @@ public class Game implements Serializable {
     private List<Bullet> bullets = new LinkedList<>();
     @Getter
     private List<PowerUp> powerUps = new LinkedList<>();
-    private Map<Player, Integer> scoreTable = new HashMap<>();
+    @Getter
+    private LinkedHashMap<Player, Integer> scoreTable = new LinkedHashMap<>();
     @Getter @Setter
     private boolean gameStarted = false;
     @Getter
@@ -123,6 +124,7 @@ public class Game implements Serializable {
         bullets.removeIf(bullet -> bullet.getStatus() == Status.DEAD);
         powerUps.removeIf(powerUp -> powerUp.getStatus() == Status.DEAD);
         players.stream().filter(p -> p.getStatus() == Status.DEAD).forEach(player -> {
+            scoreTable.put(player.getKilledBy(), scoreTable.get(player.getKilledBy()) + pointsPerKill);
             player.setHitPoints(GameObjectsConstants.Player.HIT_POINTS);
             player.setStatus(Status.ALIVE);
             newPlayerLocation(player);
