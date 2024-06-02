@@ -10,6 +10,8 @@ public class ClientData {
     @Getter @Setter
     Integer lastPackageNum = -1;
     @Getter @Setter
+    Long lastPackageTime = 0L;
+    @Getter @Setter
     Integer clientID = 0;
     @Getter @Setter
     ClientStatus clientStatus = ClientStatus.WAITING_FOR_ID;

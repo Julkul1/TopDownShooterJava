@@ -8,10 +8,7 @@ import project.gamelogic.objects.Player;
 import project.input.InputState;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 
@@ -34,8 +31,9 @@ public class Server {
     private static final int NANOS_IN_SECOND = 1000000000;
     private static final long TARGET_TIME = NANOS_IN_SECOND / TARGET_TICK_RATE;
     // Lobby members
-    private static final int PLAYERS_REQUIRED_TO_START = 2;
-    private static final int LOBBY_START_COUNTDOWN = 5;
+    private static final int PLAYERS_REQUIRED_TO_START = 2; // sec
+    private static final int LOBBY_START_COUNTDOWN = 10; // sec
+    private static final int PLAYER_TIMEOUT_TIME = 5; // sec
 
 
     ////////////////////////////////////////
@@ -78,11 +76,20 @@ public class Server {
             while (delta >= 1) {
                 if (ticks % 3 == 0) {
                     readClientsInput(serverSocket);
+
+                    if (checkIfSomePlayersDisconnected()) {
+                        removeDisconnectedPlayersFromGame();
+                        if (clientAdressMap.size() < PLAYERS_REQUIRED_TO_START) {
+                            lobbyStartTimer = LOBBY_START_COUNTDOWN;
+                        }
+                    }
+
                     updatePlayersStatus();
                     playersReady = getNumberOfReadyPlayers();
                     if (lobbyStartTimer <= 0) {
                         game.setGameStarted(true);
                     }
+
                     // Send new ids or lobby data to clients
                     // These methods guarantee only 1 type of data will be sent
                     sendIDDataToClients(serverSocket);
@@ -128,6 +135,9 @@ public class Server {
 
                 if (ticks % 3 == 0) {
                     readClientsInput(serverSocket);
+                    if (checkIfSomePlayersDisconnected()) {
+                        removeDisconnectedPlayersFromGame();
+                    }
                     manipulateClientsInput();
                     sendDataToClients(serverSocket);
                 }
@@ -179,6 +189,7 @@ public class Server {
                 if (clientAdressMap.get(clientDataKey).getLastPackageNum() < receivedMessage.getMessageNum()) {
                     clientAdressMap.get(clientDataKey).setObjectReceived(receivedMessage.getData());
                     clientAdressMap.get(clientDataKey).setLastPackageNum(receivedMessage.getMessageNum());
+                    clientAdressMap.get(clientDataKey).setLastPackageTime(System.currentTimeMillis());
                     if (!lastConnectedClients.contains(clientDataKey)) {
                         lastConnectedClients.add(clientDataKey);
                     }
@@ -298,6 +309,39 @@ public class Server {
             if (clientAdressMap.get(clientKey).getObjectReceived() instanceof InputState) {
                 game.updatePlayerControl((InputState) clientAdressMap.get(clientKey).getObjectReceived(), clientAdressMap.get(clientKey).getClientID());
             }
+        }
+    }
+
+    private boolean checkIfSomePlayersDisconnected() {
+        boolean playersDisconnected = false;
+        long currentTime = System.currentTimeMillis();
+
+        for (ClientDataKey client : clientAdressMap.keySet()) {
+            long inactivityTime = currentTime - clientAdressMap.get(client).getLastPackageTime();
+            inactivityTime /= 1000;
+            if (inactivityTime >= PLAYER_TIMEOUT_TIME) {
+                clientAdressMap.get(client).setClientStatus(ClientStatus.QUITED);
+                playersDisconnected = true;
+            }
+        }
+
+        return  playersDisconnected;
+    }
+
+    private void removeDisconnectedPlayersFromGame() {
+        List<ClientDataKey> clientsToRemove = new ArrayList<>();
+
+        for (ClientDataKey client : clientAdressMap.keySet()) {
+            if (clientAdressMap.get(client).getClientStatus() == ClientStatus.QUITED) {
+                clientsToRemove.add(client);
+                Player player = game.getPlayerByID(clientAdressMap.get(client).getClientID());
+                game.getPlayers().remove(player);
+                game.getScoreTable().remove(player);
+            }
+        }
+
+        for (ClientDataKey client : clientsToRemove) {
+            clientAdressMap.remove(client);
         }
     }
 }

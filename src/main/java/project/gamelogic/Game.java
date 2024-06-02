@@ -124,7 +124,9 @@ public class Game implements Serializable {
         bullets.removeIf(bullet -> bullet.getStatus() == Status.DEAD);
         powerUps.removeIf(powerUp -> powerUp.getStatus() == Status.DEAD);
         players.stream().filter(p -> p.getStatus() == Status.DEAD).forEach(player -> {
-            scoreTable.put(player.getKilledBy(), scoreTable.get(player.getKilledBy()) + pointsPerKill);
+            if (scoreTable.containsKey(player.getKilledBy())) {
+                scoreTable.put(player.getKilledBy(), scoreTable.get(player.getKilledBy()) + pointsPerKill);
+            }
             player.setHitPoints(GameObjectsConstants.Player.HIT_POINTS);
             player.setStatus(Status.ALIVE);
             newPlayerLocation(player);
