@@ -16,6 +16,7 @@ import java.util.List;
 
 public class GameWindow extends JPanel implements PaintingConstants {
     private final Client client;
+    private JFrame frame;
 
     private int mainPlayerID;
     private Game game;
@@ -23,7 +24,7 @@ public class GameWindow extends JPanel implements PaintingConstants {
 
     public GameWindow(Client client, GameInputListener gameInputListener) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Top Down Map View");
+            frame = new JFrame("Top Down Map View");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.getContentPane().add(this);
             frame.pack();
@@ -38,6 +39,12 @@ public class GameWindow extends JPanel implements PaintingConstants {
         addKeyListener(gameInputListener);
         addMouseListener(gameInputListener);
         addMouseMotionListener(gameInputListener);
+    }
+
+    public void closeWindow() {
+        if (frame != null) {
+            frame.dispose();
+        }
     }
 
     private void drawPlayer(Graphics2D g2) {
@@ -192,7 +199,12 @@ public class GameWindow extends JPanel implements PaintingConstants {
         if (textWidth > widestTextWidth) widestTextWidth = textWidth;
         if (textX < scoreboardX) scoreboardX = textX;
 
-        text = "Scoreboard:";
+        if (!game.isGameOver()) {
+            text = "Scoreboard:";
+        }
+        else {
+            text = "Game Over!";
+        }
         textWidth = metrics.stringWidth(text);
         textX = (View.WIDTH - textWidth) / 2 + Scoreboard_Paint.X_OFFSET;
         g2.drawString(text, textX, textY);
@@ -208,6 +220,9 @@ public class GameWindow extends JPanel implements PaintingConstants {
             }
             else {
                 text = player.getID() + ": " + scoreTable.get(player);
+            }
+            if (game.isGameOver() && scoreTable.get(player) >= Game.getPointsToWin()) {
+                text += " WINNER";
             }
             textWidth = metrics.stringWidth(text);
             textX = (View.WIDTH - textWidth) / 2 + Scoreboard_Paint.X_OFFSET;

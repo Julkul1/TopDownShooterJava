@@ -43,6 +43,7 @@ public class Client {
     public static int RECEIVE_DATA_ARRAY_SIZE = 2058;
     private int latestClientPackageNum = 0;
     private int latestServerPackageNum = 0;
+    private static final int GAME_OVER_COUNTDOWN = 10; //sec
 
 
     ////////////////////////////////////////
@@ -70,6 +71,8 @@ public class Client {
             joinLobby(clientSocket);
             System.out.println("Game started");
             runGame(clientSocket);
+            gameWindow.closeWindow();
+            System.out.println("Client closed");
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -133,8 +136,9 @@ public class Client {
         double delta = 0;
         double deltaTime = 0;
         int ticks = 0;
+        double gameFinishTimer = GAME_OVER_COUNTDOWN;
 
-        while (!Thread.interrupted()) {
+        while (!Thread.interrupted() && gameFinishTimer > 0) {
             long now = System.nanoTime();
             deltaTime += (now - lastTime) / (double) NANOS_IN_SECOND;
             delta += (now - lastTime) / (double) TARGET_TIME;
@@ -155,6 +159,10 @@ public class Client {
                 // Paint window every 2 ticks (60 fps)
                 if (ticks % 2 == 0) {
                     gameWindow.repaint();
+                }
+
+                if (game.isGameOver()) {
+                    gameFinishTimer -= deltaTime;
                 }
 
                 deltaTime -= delta * TARGET_TIME / NANOS_IN_SECOND;

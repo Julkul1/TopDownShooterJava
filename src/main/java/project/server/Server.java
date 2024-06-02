@@ -34,6 +34,7 @@ public class Server {
     private static final int PLAYERS_REQUIRED_TO_START = 2; // sec
     private static final int LOBBY_START_COUNTDOWN = 10; // sec
     private static final int PLAYER_TIMEOUT_TIME = 5; // sec
+    private static final int GAME_OVER_COUNTDOWN = 10; //sec
 
 
     ////////////////////////////////////////
@@ -52,6 +53,7 @@ public class Server {
             startLobby(serverSocket);
             System.out.println("Game Started");
             startGame(serverSocket);
+            System.out.println("Server closed");
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -121,8 +123,9 @@ public class Server {
         double delta = 0;
         double deltaTime = 0;
         int ticks = 0;
+        double gameFinishTimer = GAME_OVER_COUNTDOWN;
 
-        while (!Thread.interrupted()) {
+        while (!Thread.interrupted() && gameFinishTimer > 0) {
 
             long now = System.nanoTime();
             deltaTime += (now - lastTime) / (double) NANOS_IN_SECOND;
@@ -140,6 +143,10 @@ public class Server {
                     }
                     manipulateClientsInput();
                     sendDataToClients(serverSocket);
+                }
+
+                if (game.isGameOver()) {
+                    gameFinishTimer -= deltaTime;
                 }
 
                 deltaTime -= delta * TARGET_TIME / NANOS_IN_SECOND;

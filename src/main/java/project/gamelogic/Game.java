@@ -1,6 +1,7 @@
 package project.gamelogic;
 
 import lombok.Setter;
+import lombok.extern.flogger.Flogger;
 import project.gamelogic.objects.*;
 import project.input.InputState;
 import project.gamelogic.objects.basic.StaticObject;
@@ -14,7 +15,8 @@ import java.util.*;
 import java.util.List;
 
 public class Game implements Serializable {
-    private static final int pointsToWin = 100;
+    @Getter
+    private static final int pointsToWin = 20;
     private static final int pointsPerKill = 5;
 
     @Getter
@@ -27,6 +29,8 @@ public class Game implements Serializable {
     private LinkedHashMap<Player, Integer> scoreTable = new LinkedHashMap<>();
     @Getter @Setter
     private boolean gameStarted = false;
+    @Getter @Setter
+    private boolean gameOver = false;
     @Getter
     private final boolean isServer;
 
@@ -124,8 +128,11 @@ public class Game implements Serializable {
         bullets.removeIf(bullet -> bullet.getStatus() == Status.DEAD);
         powerUps.removeIf(powerUp -> powerUp.getStatus() == Status.DEAD);
         players.stream().filter(p -> p.getStatus() == Status.DEAD).forEach(player -> {
-            if (scoreTable.containsKey(player.getKilledBy())) {
+            if (scoreTable.containsKey(player.getKilledBy()) && !gameOver) {
                 scoreTable.put(player.getKilledBy(), scoreTable.get(player.getKilledBy()) + pointsPerKill);
+                if (isServer && scoreTable.get(player.getKilledBy()) >= pointsToWin) {
+                    gameOver = true;
+                }
             }
             player.setHitPoints(GameObjectsConstants.Player.HIT_POINTS);
             player.setStatus(Status.ALIVE);
