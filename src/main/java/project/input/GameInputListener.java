@@ -1,4 +1,6 @@
-package project;
+package project.input;
+
+import project.input.InputState;
 
 import java.awt.event.*;
 
@@ -60,6 +62,11 @@ public class GameInputListener implements KeyListener, MouseListener, MouseMotio
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {
         switch(mouseEvent.getButton()) {
             case MouseEvent.BUTTON1:
                 inputState.setLeftMouseClick(true);
@@ -68,13 +75,12 @@ public class GameInputListener implements KeyListener, MouseListener, MouseMotio
     }
 
     @Override
-    public void mousePressed(MouseEvent mouseEvent) {
-
-    }
-
-    @Override
     public void mouseReleased(MouseEvent mouseEvent) {
-
+        switch(mouseEvent.getButton()) {
+            case MouseEvent.BUTTON1:
+                inputState.setLeftMouseClick(false);
+                break;
+        }
     }
 
     @Override
@@ -89,12 +95,12 @@ public class GameInputListener implements KeyListener, MouseListener, MouseMotio
 
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
-
+        mouseMoved(mouseEvent);
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {
-        inputState.setCursorX(e.getX());
-        inputState.setCursorY(e.getY());
+    public void mouseMoved(MouseEvent mouseEvent) {
+        inputState.setCursorX(mouseEvent.getX());
+        inputState.setCursorY(mouseEvent.getY());
     }
 }

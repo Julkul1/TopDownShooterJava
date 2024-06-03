@@ -15,6 +15,7 @@ public class GameMap {
         Point2D.Float center = object.getCenter();
 
         if (doesCollide(object)) {
+            // Move player back to boundaries of a map
             if (object instanceof Player) {
                 float x, y;
                 if (center.getX() + radius > WIDTH) {

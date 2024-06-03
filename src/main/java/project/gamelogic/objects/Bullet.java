@@ -13,8 +13,8 @@ public class Bullet extends DynamicObject implements GameObjectsConstants.Bullet
     @Getter
     private final Player creator;
 
-    public Bullet(Player creator, Point2D.Float center, Color color, double moveAngle, float damage) {
-        super(center, RADIUS, color, moveAngle, SPEED);
+    public Bullet(Player creator, Point2D.Float center, double moveAngle, float damage) {
+        super(center, RADIUS, moveAngle, SPEED);
         this.damage = damage;
         this.creator = creator;
         this.isMoving = true;
